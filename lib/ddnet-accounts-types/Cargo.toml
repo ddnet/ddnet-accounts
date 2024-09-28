@@ -1,0 +1,10 @@
+[package]
+name = "ddnet-accounts-types"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jupeyy"]
+license = "MIT OR Apache-2.0"
+description = "Minimal dependency account related types."
+repository = "https://github.com/ddnet/ddnet-accounts"
+
+[dependencies]

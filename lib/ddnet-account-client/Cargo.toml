@@ -1,0 +1,25 @@
+[package]
+name = "ddnet-account-client"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jupeyy"]
+license = "MIT OR Apache-2.0"
+description = "The account related operations of a client, that want to manage accounts & do requests to the account server."
+repository = "https://github.com/ddnet/ddnet-accounts"
+
+[dependencies]
+ddnet-accounts-shared = { version = "0.1.0", path = "../ddnet-accounts-shared" }
+ddnet-accounts-types = { version = "0.1.0", path = "../ddnet-accounts-types" }
+
+async-trait = "0.1.81"
+email_address = { version = "0.2.9", features = ["serde"] }
+serde_json = "1.0.125"
+anyhow = { version = "1.0.86", features = ["backtrace"] }
+thiserror = "1.0.63"
+serde = { version = "1.0.208", features = ["derive"] }
+x509-parser = { version = "0.16.0", default-features = false }
+x509-cert = { version = "0.2.5" }
+hex = "0.4.3"
+
+[dev-dependencies]
+pollster = "0.3.0"

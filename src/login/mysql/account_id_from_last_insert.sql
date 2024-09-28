@@ -1,0 +1,2 @@
+SELECT
+    CAST(LAST_INSERT_ID() AS SIGNED) AS account_id;

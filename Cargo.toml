@@ -1,9 +1,73 @@
+[workspace]
+members = [
+    "lib/ddnet-account-client",
+    "lib/ddnet-account-game-server",
+    "lib/ddnet-accounts-shared",
+    "lib/ddnet-account-sql",
+    "lib/ddnet-accounts-types",
+    "lib/ddnet-account-client-http-fs",
+    "lib/ddnet-account-client-reqwest",
+]
+
 [package]
 name = "ddnet-accounts"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
-description = "placeholder"
+description = "The account server binary, which takes HTTP requests for account related operations."
+repository = "https://github.com/ddnet/ddnet-accounts"
+
+[[bin]]
+path = "src/main.rs"
+name = "account-server"
 
 [dependencies]
+ddnet-accounts-types = { version = "0.1.0", path = "lib/ddnet-accounts-types" }
+ddnet-accounts-shared = { version = "0.1.0", path = "lib/ddnet-accounts-shared" }
+ddnet-account-sql = { version = "0.1.0", path = "lib/ddnet-account-sql" }
+
+tokio = { version = "1.39.3", features = ["rt-multi-thread", "sync", "fs", "time", "macros"] }
+axum = "0.7.5"
+anyhow = { version = "1.0.86", features = ["backtrace"] }
+# https://github.com/launchbadge/sqlx/issues/2636
+sqlx = { version = "=0.6.3", features = ["mysql", "any", "runtime-tokio-rustls", "chrono"] }
+email_address = { version = "0.2.9", features = ["serde"] }
+ed25519-dalek = { version = "2.1.1", features = ["serde", "pkcs8"] }
+async-trait = "0.1.81"
+argon2 = "0.5.3"
+serde_json = "1.0.125"
+parking_lot = "0.12.3"
+lettre = "0.11.7"
+serde = { version = "1.0.208", features = ["derive"] }
+url = { version = "2.5.2", features = ["serde"] }
+log = "0.4.22"
+clap = { version = "4.5.16", features = ["derive", "cargo"] }
+env_logger = "0.11.5"
+rcgen = { version = "0.13.1" }
+x509-cert = { version = "0.2.5", features = ["builder"] }
+ecdsa = { version = "0.16.9", features = ["digest", "pem"] }
+p256 = "0.13.2"
+rand = { version = "0.8.5", features = ["getrandom"], default-features = false }
+sha2 = { version = "0.10", features = ["oid"] }
+der = { version = "0.7.9", features = ["derive"] }
+chrono = { version = "0.4.38", features = ["serde"] }
+tower_governor = "0.4.2"
+tower = "0.4.13"
+strum = { version = "0.26.3", features = ["derive"] }
+reqwest = { version = "0.12.5" }
+hex = "0.4.3"
+iprange = "0.6.7"
+ipnet = "2.9.0"
+either = "1.13.0"
+notify = { version = "6.1.1", default-features = false, features = ["macos_kqueue"] }
+
+[dev-dependencies]
+ddnet-account-client = { version = "0.1.0", path = "lib/ddnet-account-client" }
+ddnet-account-game-server = { version = "0.1.0", path = "lib/ddnet-account-game-server" }
+ddnet-account-client-http-fs = { version = "0.1.0", path = "lib/ddnet-account-client-http-fs" }
+ddnet-account-client-reqwest = { version = "0.1.0", path = "lib/ddnet-account-client-reqwest" }
+
+regex = "1.10.6"
+tempfile = "3.12.0"
+

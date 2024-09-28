@@ -1,0 +1,75 @@
+name: Build
+
+on:
+  push:
+    branches-ignore:
+      - gh-readonly-queue/**
+  pull_request:
+  merge_group:
+
+jobs:
+  build-cmake:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Prepare Linux
+      if: contains(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install rustc cargo postfix mailutils -y
+
+    - name: Prepare Linux (mysql & email)
+      if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
+      run: |
+        sudo touch /etc/aliases
+        sudo bash -c 'echo "test: root" >> /etc/aliases'
+        sudo bash -c 'echo "test2: root" >> /etc/aliases'
+        sudo postalias /etc/aliases
+        sudo apt-get install libmariadb-dev mariadb-server -y
+        sudo mysql <<EOF
+        CREATE USER 'ddnet-account-test'@localhost IDENTIFIED BY 'test';
+        CREATE DATABASE ddnet_account_test;
+        GRANT ALL PRIVILEGES ON ddnet_account_test.* TO 'ddnet-account-test'@localhost;
+        FLUSH PRIVILEGES;
+        EOF
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Build in debug mode
+      run: |
+        cargo build -p account-client
+        cargo build -p account-game-server
+        cargo build -p accounts-shared
+        cargo build -p account-sql
+        cargo build -p accounts-types
+        cargo build -p client-http-fs
+        cargo build -p client-reqwest
+        cargo build
+
+    - name: Test debug
+      run: |
+        cargo test -- --test-threads=1
+
+    - name: Build in release mode
+      run: |
+        cargo build -p account-client --release
+        cargo build -p account-game-server --release
+        cargo build -p accounts-shared --release
+        cargo build -p account-sql --release
+        cargo build -p accounts-types --release
+        cargo build -p client-http-fs --release
+        cargo build -p client-reqwest --release
+        cargo build --release
+
+    - name: Test release
+      run: |
+        cargo test --release -- --test-threads=1
