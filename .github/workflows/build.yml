@@ -46,13 +46,13 @@ jobs:
 
     - name: Build in debug mode
       run: |
-        cargo build -p account-client
-        cargo build -p account-game-server
-        cargo build -p accounts-shared
-        cargo build -p account-sql
-        cargo build -p accounts-types
-        cargo build -p client-http-fs
-        cargo build -p client-reqwest
+        cargo build -p ddnet-account-client
+        cargo build -p ddnet-account-game-server
+        cargo build -p ddnet-accounts-shared
+        cargo build -p ddnet-account-sql
+        cargo build -p ddnet-accounts-types
+        cargo build -p ddnet-account-client-http-fs
+        cargo build -p ddnet-account-client-reqwest
         cargo build
 
     - name: Test debug
@@ -61,13 +61,13 @@ jobs:
 
     - name: Build in release mode
       run: |
-        cargo build -p account-client --release
-        cargo build -p account-game-server --release
-        cargo build -p accounts-shared --release
-        cargo build -p account-sql --release
-        cargo build -p accounts-types --release
-        cargo build -p client-http-fs --release
-        cargo build -p client-reqwest --release
+        cargo build -p ddnet-account-client --release
+        cargo build -p ddnet-account-game-server --release
+        cargo build -p ddnet-accounts-shared --release
+        cargo build -p ddnet-account-sql --release
+        cargo build -p ddnet-accounts-types --release
+        cargo build -p ddnet-account-client-http-fs --release
+        cargo build -p ddnet-account-client-reqwest --release
         cargo build --release
 
     - name: Test release
