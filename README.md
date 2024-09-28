@@ -50,13 +50,9 @@ To enhance security the database must support TLS connections (for non localhost
     ```
 
 SQL formatting is doing with `sleek -n <file>`.
-
-Allow & deny lists for ip bans, mail domain bans & allow lists are automatically reloaded on change.
-It's strongly recommended to create the files somewhere else and only use `mv` to overwrite the files, since
-file system operations are rather racy, which in worst case can lead to loading a partially written file.
-(The watcher tries to minimize these events by only listening for write-close events and similar, but can't prevent
-all cases.)
-
+```
+cargo install sleek@0.1.1
+```
 
 After executing `./account-server --setup` there should be a `config` directory.
 Inside that directory the ban & allow lists are placed. Additionally the email templates
@@ -66,6 +62,13 @@ To use the existing email template do:
 cp templates/email/template.html config/account_tokens.html
 cp templates/email/template.html config/credential_auth_tokens.html
 ```
+
+Allow & deny lists for ip bans, mail domain bans & allow lists aswell as the email templates are automatically reloaded on change.
+It's strongly recommended to create the files somewhere else and only use `mv` to overwrite the files, since
+file system operations are rather racy, which in worst case can lead to loading a partially written file.
+(The watcher tries to minimize these events by only listening for write-close events and similar, but can't prevent
+all cases.)
+
 
 Tests must be executed with:
 ```
