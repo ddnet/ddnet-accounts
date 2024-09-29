@@ -21,7 +21,7 @@ pub enum LinkCredentialResult {
     #[error("{0}")]
     FsLikeError(FsLikeError),
     /// The account server responded with an error.
-    #[error("{0:?}")]
+    #[error("{0}")]
     AccountServerRequstError(AccountServerRequestError<Empty>),
     /// Errors that are not handled explicitly.
     #[error("Linking credential failed: {0}")]

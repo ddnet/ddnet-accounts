@@ -11,7 +11,7 @@ CREATE DATABASE ddnet_account_test;
 GRANT ALL PRIVILEGES ON ddnet_account_test.* TO 'ddnet-account-test'@localhost;
 ```
 
-There has to be a smtp server running (for fake emails)
+There has to be a smtp server running (for fake emails)  
 You might have to make sure you can send mails to test@localhost & test2@localhost:
 ```
 sudo touch /etc/aliases

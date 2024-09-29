@@ -23,7 +23,7 @@ pub enum AccountTokenResult {
     /// A fs like error occurred.
     #[error("{0}")]
     FsLikeError(FsLikeError),
-    #[error("{0:?}")]
+    #[error("{0}")]
     /// The account server responded with an error.
     AccountServerRequstError(AccountServerRequestError<AccountTokenError>),
     /// Errors that are not handled explicitly.
