@@ -49,7 +49,7 @@ To enhance security the database must support TLS connections (for non localhost
     sudo chmod 600 /etc/mysql/ssl/ca-key.pem
     ```
 
-SQL formatting is doing with `sleek -n <file>`.
+SQL formatting is done with `sleek -n <file>`.
 ```
 cargo install sleek@0.1.1
 ```
