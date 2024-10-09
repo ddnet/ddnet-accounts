@@ -13,20 +13,23 @@ pub async fn update_impl(pool: &AnyPool, shared: &Arc<Shared>) {
         if let Ok(connection) = connection.acquire().await {
             // cleanup credential auth tokens
             let _ = connection
-                .execute(
-                    CleanupCredentialAuthTokens {}
-                        .query(&shared.db.cleanup_credential_auth_tokens_statement),
-                )
+                .execute(CleanupCredentialAuthTokens {}.query(
+                    connection,
+                    &shared.db.cleanup_credential_auth_tokens_statement,
+                ))
                 .await;
 
             // cleanup account tokens
             let _ = connection
-                .execute(CleanupAccountTokens {}.query(&shared.db.cleanup_account_tokens_statement))
+                .execute(
+                    CleanupAccountTokens {}
+                        .query(connection, &shared.db.cleanup_account_tokens_statement),
+                )
                 .await;
 
             // cleanup certs
             let _ = connection
-                .execute(CleanupCerts {}.query(&shared.db.cleanup_certs_statement))
+                .execute(CleanupCerts {}.query(connection, &shared.db.cleanup_certs_statement))
                 .await;
         }
     }

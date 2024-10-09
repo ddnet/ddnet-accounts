@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::sync::Arc;
 
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::{
     account_server::{
@@ -13,7 +14,6 @@ use ddnet_accounts_shared::{
         CredentialAuthTokenSteamRequest,
     },
 };
-use axum::Json;
 use sqlx::{Acquire, AnyPool};
 
 use crate::{
@@ -99,7 +99,7 @@ pub async fn credential_auth_token_email_impl(
     let con = connection.acquire().await?;
 
     let credential_auth_token_res = query_add_credential_auth_token
-        .query(&shared.db.credential_auth_token_statement)
+        .query(con, &shared.db.credential_auth_token_statement)
         .execute(&mut *con)
         .await?;
     anyhow::ensure!(
@@ -176,7 +176,7 @@ pub async fn credential_auth_token_steam_impl(
     let con = connection.acquire().await?;
 
     let credential_auth_token_res = query_add_credential_auth_token
-        .query(&shared.db.credential_auth_token_statement)
+        .query(con, &shared.db.credential_auth_token_statement)
         .execute(&mut *con)
         .await?;
     anyhow::ensure!(

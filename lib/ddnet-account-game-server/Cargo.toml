@@ -1,6 +1,6 @@
 [package]
 name = "ddnet-account-game-server"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -10,10 +10,20 @@ repository = "https://github.com/ddnet/ddnet-accounts"
 [dependencies]
 ddnet-accounts-types = { version = "0.1.0", path = "../ddnet-accounts-types" }
 ddnet-accounts-shared = { version = "0.1.0", path = "../ddnet-accounts-shared" }
-ddnet-account-sql = { version = "0.1.0", path = "../ddnet-account-sql" }
+ddnet-account-sql = { version = "0.2.0", path = "../ddnet-account-sql", default-features = false }
 
 # https://github.com/launchbadge/sqlx/issues/2636
-sqlx = { version = "=0.6.3", features = ["mysql", "any", "runtime-tokio-rustls", "chrono"] }
+sqlx = { version = "=0.6.3", features = ["any", "runtime-tokio-rustls", "chrono"] }
 anyhow = { version = "1.0.86", features = ["backtrace"] }
 async-trait = "0.1.81"
 thiserror = "1.0.63"
+
+[dev-dependencies]
+tokio = { version = "1.39.3", features = ["rt-multi-thread", "sync", "fs", "time", "macros"] }
+anyhow = { version = "1.0.86", features = ["backtrace"] }
+
+[features]
+mysql = ["ddnet-account-sql/mysql", "sqlx/mysql"]
+sqlite = ["ddnet-account-sql/sqlite", "sqlx/sqlite"]
+
+default = ["mysql"]

@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::sync::Arc;
 
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::{
     account_server::{
@@ -10,7 +11,6 @@ use ddnet_accounts_shared::{
     },
     client::delete::DeleteRequest,
 };
-use axum::Json;
 use sqlx::{Acquire, AnyPool, Connection};
 
 use crate::{
@@ -52,7 +52,7 @@ pub async fn delete(shared: Arc<Shared>, pool: AnyPool, data: DeleteRequest) -> 
                 };
 
                 let row = acc_token_qry
-                    .query(&shared.db.account_token_qry_statement)
+                    .query(connection, &shared.db.account_token_qry_statement)
                     .fetch_one(&mut **connection)
                     .await?;
 
@@ -62,7 +62,7 @@ pub async fn delete(shared: Arc<Shared>, pool: AnyPool, data: DeleteRequest) -> 
                 let qry = InvalidateAccountToken {
                     token: &data.account_token,
                 };
-                qry.query(&shared.db.invalidate_account_token_statement)
+                qry.query(connection, &shared.db.invalidate_account_token_statement)
                     .execute(&mut **connection)
                     .await?;
 
@@ -78,7 +78,7 @@ pub async fn delete(shared: Arc<Shared>, pool: AnyPool, data: DeleteRequest) -> 
                     session_data: &None,
                 };
 
-                qry.query(&shared.db.remove_sessions_except_statement)
+                qry.query(connection, &shared.db.remove_sessions_except_statement)
                     .execute(&mut **connection)
                     .await?;
 
@@ -86,14 +86,14 @@ pub async fn delete(shared: Arc<Shared>, pool: AnyPool, data: DeleteRequest) -> 
                 let qry = UnlinkCredentialEmail {
                     account_id: &account_id,
                 };
-                qry.query(&shared.db.unlink_credential_email_statement)
+                qry.query(connection, &shared.db.unlink_credential_email_statement)
                     .execute(&mut **connection)
                     .await?;
 
                 let qry = UnlinkCredentialSteam {
                     account_id: &account_id,
                 };
-                qry.query(&shared.db.unlink_credential_steam_statement)
+                qry.query(connection, &shared.db.unlink_credential_steam_statement)
                     .execute(&mut **connection)
                     .await?;
 
@@ -102,7 +102,7 @@ pub async fn delete(shared: Arc<Shared>, pool: AnyPool, data: DeleteRequest) -> 
                     account_id: &account_id,
                 };
 
-                qry.query(&shared.db.remove_account_statement)
+                qry.query(connection, &shared.db.remove_account_statement)
                     .execute(&mut **connection)
                     .await?;
 

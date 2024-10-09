@@ -1,7 +1,7 @@
-use ddnet_account_sql::query::Query;
-use ddnet_accounts_types::account_id::AccountId;
 use anyhow::anyhow;
 use async_trait::async_trait;
+use ddnet_account_sql::query::Query;
+use ddnet_accounts_types::account_id::AccountId;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Statement;
@@ -18,6 +18,7 @@ pub struct RenameUser<'a> {
 
 #[async_trait]
 impl<'a> Query<()> for RenameUser<'a> {
+    #[cfg(feature = "mysql")]
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -25,7 +26,25 @@ impl<'a> Query<()> for RenameUser<'a> {
             .prepare(include_str!("mysql/try_rename.sql"))
             .await?)
     }
+    #[cfg(feature = "sqlite")]
+    async fn prepare_sqlite(
+        connection: &mut sqlx::AnyConnection,
+    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        Ok(connection
+            .prepare(include_str!("sqlite/try_rename.sql"))
+            .await?)
+    }
+    #[cfg(feature = "mysql")]
     fn query_mysql<'b>(
+        &'b self,
+        statement: &'b sqlx::any::AnyStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        let account_id = self.account_id;
+
+        statement.query().bind(self.name).bind(account_id)
+    }
+    #[cfg(feature = "sqlite")]
+    fn query_sqlite<'b>(
         &'b self,
         statement: &'b sqlx::any::AnyStatement<'static>,
     ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {

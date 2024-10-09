@@ -11,6 +11,9 @@
 #![deny(clippy::nursery)]
 #![deny(clippy::all)]
 
+#[cfg(not(any(feature = "mysql", feature = "sqlite")))]
+std::compile_error!("at least the mysql or sqlite feature must be used.");
+
 /// Data types and operations related to
 /// logging in a user to the game server.
 pub mod auto_login;
@@ -27,3 +30,6 @@ pub mod setup;
 /// Shared data that is used in the game
 /// server implementation.
 pub mod shared;
+
+#[cfg(test)]
+mod tests;

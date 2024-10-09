@@ -48,8 +48,12 @@ jobs:
       run: |
         cargo build -p ddnet-account-client
         cargo build -p ddnet-account-game-server
+        cargo build -p ddnet-account-game-server --no-default-features --features sqlite
+        cargo build -p ddnet-account-game-server --no-default-features --features sqlite,mysql
         cargo build -p ddnet-accounts-shared
         cargo build -p ddnet-account-sql
+        cargo build -p ddnet-account-sql --no-default-features --features sqlite
+        cargo build -p ddnet-account-sql --no-default-features --features sqlite,mysql
         cargo build -p ddnet-accounts-types
         cargo build -p ddnet-account-client-http-fs
         cargo build -p ddnet-account-client-reqwest
@@ -63,8 +67,12 @@ jobs:
       run: |
         cargo build -p ddnet-account-client --release
         cargo build -p ddnet-account-game-server --release
+        cargo build -p ddnet-account-game-server --release --no-default-features --features sqlite
+        cargo build -p ddnet-account-game-server --release --no-default-features --features sqlite,mysql
         cargo build -p ddnet-accounts-shared --release
         cargo build -p ddnet-account-sql --release
+        cargo build -p ddnet-account-sql --release --no-default-features --features sqlite
+        cargo build -p ddnet-account-sql --release --no-default-features --features sqlite,mysql
         cargo build -p ddnet-accounts-types --release
         cargo build -p ddnet-account-client-http-fs --release
         cargo build -p ddnet-account-client-reqwest --release
@@ -72,4 +80,5 @@ jobs:
 
     - name: Test release
       run: |
-        cargo test --release -- --test-threads=1
+        cargo test --release -p ddnet-accounts -- --test-threads=1
+        cargo test --release -p ddnet-account-game-server --features sqlite -- --test-threads=1

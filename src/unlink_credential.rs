@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::{str::FromStr, sync::Arc};
 
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::{
     account_server::{
@@ -10,7 +11,6 @@ use ddnet_accounts_shared::{
     },
     client::unlink_credential::UnlinkCredentialRequest,
 };
-use axum::Json;
 use queries::{UnlinkCredentialByEmail, UnlinkCredentialBySteam};
 use sqlx::{Acquire, AnyPool, Connection};
 
@@ -64,7 +64,7 @@ pub async fn unlink_credential(
                         // remove the current email, if exists.
                         let qry = UnlinkCredentialByEmail { email: &email };
 
-                        qry.query(&shared.db.unlink_credential_by_email_statement)
+                        qry.query(connection, &shared.db.unlink_credential_by_email_statement)
                             .execute(&mut **connection)
                             .await?
                             .rows_affected()
@@ -76,7 +76,7 @@ pub async fn unlink_credential(
                             steamid64: &steamid64,
                         };
 
-                        qry.query(&shared.db.unlink_credential_by_steam_statement)
+                        qry.query(connection, &shared.db.unlink_credential_by_steam_statement)
                             .execute(&mut **connection)
                             .await?
                             .rows_affected()
