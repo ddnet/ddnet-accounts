@@ -62,7 +62,7 @@ pub async fn auto_login(
         };
 
         let res = qry
-            .query(&shared.db.register_user_statement)
+            .query(con, &shared.db.register_user_statement)
             .execute(&mut *con)
             .await
             .map_err(|err| AutoLoginError::Database(err.into()))?;

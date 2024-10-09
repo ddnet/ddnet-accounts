@@ -84,13 +84,25 @@ async fn rename_hardening() {
         .await;
         assert!(auto_login_res.is_ok_and(|v| v));
 
-        ddnet_account_game_server::rename::rename(
-            game_server_data.clone(),
-            &pool,
-            &user_id,
-            "nameless_tee",
-        )
-        .await?;
+        // Make sure 32 character long names work
+        assert!(
+            ddnet_account_game_server::rename::rename(
+                game_server_data.clone(),
+                &pool,
+                &user_id,
+                "01234567890123456789012345678901",
+            )
+            .await?
+        );
+        assert!(
+            ddnet_account_game_server::rename::rename(
+                game_server_data.clone(),
+                &pool,
+                &user_id,
+                "nameless_tee",
+            )
+            .await?
+        );
         let res = ddnet_account_game_server::rename::rename(
             game_server_data.clone(),
             &pool,

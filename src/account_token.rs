@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::sync::Arc;
 
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::{
     account_server::{
@@ -12,7 +13,6 @@ use ddnet_accounts_shared::{
         AccountTokenEmailRequest, AccountTokenOperation, AccountTokenSteamRequest,
     },
 };
-use axum::Json;
 use queries::{AddAccountTokenEmail, AddAccountTokenSteam};
 use sqlx::{Acquire, AnyPool};
 
@@ -78,7 +78,7 @@ pub async fn account_token_email_impl(
     let con = connection.acquire().await?;
 
     let account_token_res = query_add_account_token
-        .query(&shared.db.account_token_email_statement)
+        .query(con, &shared.db.account_token_email_statement)
         .execute(&mut *con)
         .await?;
     anyhow::ensure!(
@@ -151,7 +151,7 @@ pub async fn account_token_steam_impl(
     let con = connection.acquire().await?;
 
     let account_token_res = query_add_account_token
-        .query(&shared.db.account_token_steam_statement)
+        .query(con, &shared.db.account_token_steam_statement)
         .execute(&mut *con)
         .await?;
     anyhow::ensure!(

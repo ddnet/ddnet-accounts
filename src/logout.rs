@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::sync::Arc;
 
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::{
     account_server::{
@@ -10,7 +11,6 @@ use ddnet_accounts_shared::{
     },
     client::logout::LogoutRequest,
 };
-use axum::Json;
 use sqlx::{Acquire, AnyPool};
 
 use crate::shared::{Shared, CERT_MAX_AGE_DELTA, CERT_MIN_AGE_DELTA};
@@ -53,7 +53,7 @@ pub async fn logout(shared: Arc<Shared>, pool: AnyPool, data: LogoutRequest) -> 
         hw_id: &data.account_data.hw_id,
     };
 
-    qry.query(&shared.db.logout_statement)
+    qry.query(connection, &shared.db.logout_statement)
         .execute(connection)
         .await?;
 

@@ -2,13 +2,13 @@ pub mod queries;
 
 use std::{str::FromStr, sync::Arc, time::Duration};
 
+use anyhow::anyhow;
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::account_server::{
     errors::{AccountServerRequestError, Empty},
     result::AccountServerReqResult,
 };
-use anyhow::anyhow;
-use axum::Json;
 use der::{Decode, Encode};
 use p256::ecdsa::{DerSignature, SigningKey};
 use queries::{AddCert, GetCerts};
@@ -148,7 +148,7 @@ pub async fn store_cert(
     let connection = connection.acquire().await?;
 
     let res = connection
-        .execute(qry.query(&db.add_cert_statement))
+        .execute(qry.query(connection, &db.add_cert_statement))
         .await?;
     anyhow::ensure!(res.rows_affected() >= 1);
 
@@ -165,7 +165,7 @@ pub async fn get_certs(
     let connection = connection.acquire().await?;
 
     let cert_rows = connection
-        .fetch_all(qry.query(&db.get_certs_statement))
+        .fetch_all(qry.query(connection, &db.get_certs_statement))
         .await?;
 
     cert_rows

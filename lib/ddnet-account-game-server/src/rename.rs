@@ -73,7 +73,7 @@ pub async fn rename(
         let qry = RenameUser { account_id, name };
 
         let res = qry
-            .query(&shared.db.try_rename_statement)
+            .query(con, &shared.db.try_rename_statement)
             .execute(&mut *con)
             .await;
 

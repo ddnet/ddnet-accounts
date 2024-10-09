@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::sync::Arc;
 
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::{
     account_server::{
@@ -10,7 +11,6 @@ use ddnet_accounts_shared::{
     },
     client::logout_all::{IgnoreSession, LogoutAllRequest},
 };
-use axum::Json;
 use sqlx::{Acquire, AnyPool, Connection};
 
 use crate::{
@@ -52,7 +52,7 @@ pub async fn logout_all(
                 };
 
                 let row = acc_token_qry
-                    .query(&shared.db.account_token_qry_statement)
+                    .query(connection, &shared.db.account_token_qry_statement)
                     .fetch_one(&mut **connection)
                     .await?;
 
@@ -62,7 +62,7 @@ pub async fn logout_all(
                 let qry = InvalidateAccountToken {
                     token: &data.account_token,
                 };
-                qry.query(&shared.db.invalidate_account_token_statement)
+                qry.query(connection, &shared.db.invalidate_account_token_statement)
                     .execute(&mut **connection)
                     .await?;
 
@@ -96,7 +96,7 @@ pub async fn logout_all(
                     session_data: &session_data,
                 };
 
-                qry.query(&shared.db.remove_sessions_except_statement)
+                qry.query(connection, &shared.db.remove_sessions_except_statement)
                     .execute(&mut **connection)
                     .await?;
 

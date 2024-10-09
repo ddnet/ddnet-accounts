@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::{str::FromStr, sync::Arc};
 
+use axum::Json;
 use ddnet_account_sql::{is_duplicate_entry, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
@@ -12,7 +13,6 @@ use ddnet_accounts_shared::{
         credential_auth_token::CredentialAuthTokenOperation, link_credential::LinkCredentialRequest,
     },
 };
-use axum::Json;
 use queries::{UnlinkCredentialEmail, UnlinkCredentialSteam};
 use sqlx::{Acquire, AnyPool, Connection};
 
@@ -57,7 +57,7 @@ pub async fn link_credential(
                 };
 
                 let row = acc_token_qry
-                    .query(&shared.db.account_token_qry_statement)
+                    .query(connection, &shared.db.account_token_qry_statement)
                     .fetch_one(&mut **connection)
                     .await?;
 
@@ -67,7 +67,7 @@ pub async fn link_credential(
                 let qry = InvalidateAccountToken {
                     token: &data.account_token,
                 };
-                qry.query(&shared.db.invalidate_account_token_statement)
+                qry.query(connection, &shared.db.invalidate_account_token_statement)
                     .execute(&mut **connection)
                     .await?;
 
@@ -97,7 +97,7 @@ pub async fn link_credential(
                             account_id: &account_id,
                         };
 
-                        qry.query(&shared.db.unlink_credential_email_statement)
+                        qry.query(connection, &shared.db.unlink_credential_email_statement)
                             .execute(&mut **connection)
                             .await?;
 
@@ -108,7 +108,7 @@ pub async fn link_credential(
                         };
 
                         let res = qry
-                            .query(&shared.db.link_credentials_email_qry_statement)
+                            .query(connection, &shared.db.link_credentials_email_qry_statement)
                             .execute(&mut **connection)
                             .await;
 
@@ -125,7 +125,7 @@ pub async fn link_credential(
                             account_id: &account_id,
                         };
 
-                        qry.query(&shared.db.unlink_credential_steam_statement)
+                        qry.query(connection, &shared.db.unlink_credential_steam_statement)
                             .execute(&mut **connection)
                             .await?;
 
@@ -136,7 +136,7 @@ pub async fn link_credential(
                         };
 
                         let res = qry
-                            .query(&shared.db.link_credentials_steam_qry_statement)
+                            .query(connection, &shared.db.link_credentials_steam_qry_statement)
                             .execute(&mut **connection)
                             .await;
 

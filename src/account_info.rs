@@ -2,6 +2,7 @@ pub mod queries;
 
 use std::{str::FromStr, sync::Arc};
 
+use axum::Json;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::{
     account_server::{
@@ -11,7 +12,6 @@ use ddnet_accounts_shared::{
     },
     client::account_info::AccountInfoRequest,
 };
-use axum::Json;
 use queries::AccountInfo;
 use sqlx::{Acquire, AnyPool};
 
@@ -56,7 +56,7 @@ pub async fn account_info(
     };
 
     let row = qry
-        .query(&shared.db.account_info)
+        .query(connection, &shared.db.account_info)
         .fetch_one(connection)
         .await?;
 
