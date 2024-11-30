@@ -17,7 +17,7 @@ pub struct RegisterUser<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for RegisterUser<'a> {
+impl Query<()> for RegisterUser<'_> {
     #[cfg(feature = "mysql")]
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,

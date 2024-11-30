@@ -17,7 +17,7 @@ pub struct RenameUser<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for RenameUser<'a> {
+impl Query<()> for RenameUser<'_> {
     #[cfg(feature = "mysql")]
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,

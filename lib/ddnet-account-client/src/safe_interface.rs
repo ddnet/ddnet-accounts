@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+use async_trait::async_trait;
 use ddnet_accounts_shared::{
     account_server::{
         account_info::AccountInfoResponse, account_token::AccountTokenError,
@@ -19,8 +21,6 @@ use ddnet_accounts_shared::{
     },
 };
 use ddnet_accounts_types::account_id::AccountId;
-use anyhow::anyhow;
-use async_trait::async_trait;
 use serde::Deserialize;
 
 use crate::{
@@ -112,7 +112,7 @@ pub struct IoSafe<'a> {
     pub io: &'a dyn Io,
 }
 
-impl<'a> IoSafe<'a> {
+impl IoSafe<'_> {
     fn des_from_vec<T>(data: Vec<u8>) -> anyhow::Result<T, HttpLikeError>
     where
         for<'de> T: Deserialize<'de>,
@@ -130,7 +130,7 @@ impl<'a> From<&'a dyn Io> for IoSafe<'a> {
 }
 
 #[async_trait]
-impl<'a> SafeIo for IoSafe<'a> {
+impl SafeIo for IoSafe<'_> {
     async fn request_credential_auth_email_token(
         &self,
         data: CredentialAuthTokenEmailRequest,

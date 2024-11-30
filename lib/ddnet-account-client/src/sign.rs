@@ -1,7 +1,7 @@
+use anyhow::anyhow;
 use ddnet_accounts_shared::client::{
     account_data::AccountDataForClient, machine_id::machine_uid, sign::prepare_sign_request,
 };
-use anyhow::anyhow;
 use thiserror::Error;
 use x509_parser::oid_registry::asn1_rs::FromDer;
 

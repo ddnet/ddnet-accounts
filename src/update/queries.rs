@@ -1,6 +1,6 @@
-use ddnet_account_sql::query::Query;
 use anyhow::anyhow;
 use axum::async_trait;
+use ddnet_account_sql::query::Query;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Statement;

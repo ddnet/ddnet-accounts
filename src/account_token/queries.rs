@@ -1,10 +1,10 @@
 use std::str::FromStr;
 
+use anyhow::anyhow;
+use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::account_token::AccountToken;
 use ddnet_accounts_types::account_id::AccountId;
-use anyhow::anyhow;
-use async_trait::async_trait;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Row;
@@ -20,7 +20,7 @@ pub struct AddAccountTokenEmail<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for AddAccountTokenEmail<'a> {
+impl Query<()> for AddAccountTokenEmail<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -52,7 +52,7 @@ pub struct AddAccountTokenSteam<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for AddAccountTokenSteam<'a> {
+impl Query<()> for AddAccountTokenSteam<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -86,7 +86,7 @@ pub struct AccountTokenData {
 }
 
 #[async_trait]
-impl<'a> Query<AccountTokenData> for AccountTokenQry<'a> {
+impl Query<AccountTokenData> for AccountTokenQry<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -118,7 +118,7 @@ pub struct InvalidateAccountToken<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for InvalidateAccountToken<'a> {
+impl Query<()> for InvalidateAccountToken<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {

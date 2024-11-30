@@ -1,7 +1,7 @@
+use anyhow::anyhow;
 use ddnet_accounts_shared::{
     account_server::certs::AccountServerCertificates, game_server::user_id::VerifyingKey,
 };
-use anyhow::anyhow;
 use x509_cert::{
     der::{Decode, Encode},
     spki::DecodePublicKey,

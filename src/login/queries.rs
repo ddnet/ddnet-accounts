@@ -1,12 +1,12 @@
 use std::str::FromStr;
 
+use anyhow::anyhow;
+use axum::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::credential_auth_token::CredentialAuthTokenOperation;
 use ddnet_accounts_shared::client::login::CredentialAuthToken;
 use ddnet_accounts_shared::client::machine_id::MachineUid;
 use ddnet_accounts_types::account_id::AccountId;
-use anyhow::anyhow;
-use axum::async_trait;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Row;
@@ -25,7 +25,7 @@ pub struct CredentialAuthTokenData {
 }
 
 #[async_trait]
-impl<'a> Query<CredentialAuthTokenData> for CredentialAuthTokenQry<'a> {
+impl Query<CredentialAuthTokenData> for CredentialAuthTokenQry<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -61,7 +61,7 @@ pub struct InvalidateCredentialAuthToken<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for InvalidateCredentialAuthToken<'a> {
+impl Query<()> for InvalidateCredentialAuthToken<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -108,7 +108,7 @@ pub struct LinkAccountCredentialEmail<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for LinkAccountCredentialEmail<'a> {
+impl Query<()> for LinkAccountCredentialEmail<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -136,7 +136,7 @@ pub struct LinkAccountCredentialSteam<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for LinkAccountCredentialSteam<'a> {
+impl Query<()> for LinkAccountCredentialSteam<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -190,7 +190,7 @@ pub struct AccountIdFromEmail<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<AccountData> for AccountIdFromEmail<'a> {
+impl Query<AccountData> for AccountIdFromEmail<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -218,7 +218,7 @@ pub struct AccountIdFromSteam<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<AccountData> for AccountIdFromSteam<'a> {
+impl Query<AccountData> for AccountIdFromSteam<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -248,7 +248,7 @@ pub struct CreateSession<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for CreateSession<'a> {
+impl Query<()> for CreateSession<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {

@@ -1,6 +1,6 @@
-use ddnet_account_sql::query::Query;
 use anyhow::anyhow;
 use axum::async_trait;
+use ddnet_account_sql::query::Query;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Row;
@@ -12,7 +12,7 @@ pub struct AddCert<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for AddCert<'a> {
+impl Query<()> for AddCert<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {

@@ -1,11 +1,11 @@
 use std::{str::FromStr, sync::Arc};
 
 use ddnet_account_client::{credential_auth_token::CredentialAuthTokenResult, login::LoginResult};
+use ddnet_account_client_reqwest::client::ClientReqwestTokioFs;
 use ddnet_accounts_shared::{
     account_server::{errors::AccountServerRequestError, login::LoginError},
     client::credential_auth_token::CredentialAuthTokenOperation,
 };
-use ddnet_account_client_reqwest::client::ClientReqwestTokioFs;
 use email_address::EmailAddress;
 use parking_lot::Mutex;
 

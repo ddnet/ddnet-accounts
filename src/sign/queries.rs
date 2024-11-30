@@ -20,7 +20,7 @@ pub struct AuthAttemptData {
 }
 
 #[async_trait::async_trait]
-impl<'a> Query<AuthAttemptData> for AuthAttempt<'a> {
+impl Query<AuthAttemptData> for AuthAttempt<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {

@@ -1,7 +1,7 @@
-use ddnet_account_sql::query::Query;
-use ddnet_accounts_shared::client::machine_id::MachineUid;
 use anyhow::anyhow;
 use axum::async_trait;
+use ddnet_account_sql::query::Query;
+use ddnet_accounts_shared::client::machine_id::MachineUid;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Statement;
@@ -12,7 +12,7 @@ pub struct RemoveSession<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for RemoveSession<'a> {
+impl Query<()> for RemoveSession<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {

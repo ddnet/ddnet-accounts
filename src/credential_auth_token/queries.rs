@@ -1,7 +1,7 @@
+use anyhow::anyhow;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::credential_auth_token::CredentialAuthTokenOperation;
 use ddnet_accounts_shared::client::login::CredentialAuthToken;
-use anyhow::anyhow;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Statement;
@@ -17,7 +17,7 @@ pub struct AddCredentialAuthToken<'a> {
 }
 
 #[async_trait::async_trait]
-impl<'a> Query<()> for AddCredentialAuthToken<'a> {
+impl Query<()> for AddCredentialAuthToken<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {

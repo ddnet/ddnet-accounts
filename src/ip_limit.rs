@@ -5,9 +5,6 @@ use std::{
     sync::Arc,
 };
 
-use ddnet_accounts_shared::account_server::{
-    errors::AccountServerRequestError, result::AccountServerReqResult,
-};
 use axum::{
     body::Body,
     extract::{ConnectInfo, State},
@@ -15,6 +12,9 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
     Json,
+};
+use ddnet_accounts_shared::account_server::{
+    errors::AccountServerRequestError, result::AccountServerReqResult,
 };
 use parking_lot::RwLock;
 use reqwest::StatusCode;

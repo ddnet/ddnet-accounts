@@ -1,7 +1,7 @@
-use ddnet_account_sql::query::Query;
-use ddnet_accounts_types::account_id::AccountId;
 use anyhow::anyhow;
 use axum::async_trait;
+use ddnet_account_sql::query::Query;
+use ddnet_accounts_types::account_id::AccountId;
 use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Statement;
@@ -11,7 +11,7 @@ pub struct UnlinkCredentialEmail<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for UnlinkCredentialEmail<'a> {
+impl Query<()> for UnlinkCredentialEmail<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
@@ -35,7 +35,7 @@ pub struct UnlinkCredentialSteam<'a> {
 }
 
 #[async_trait]
-impl<'a> Query<()> for UnlinkCredentialSteam<'a> {
+impl Query<()> for UnlinkCredentialSteam<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::AnyConnection,
     ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
