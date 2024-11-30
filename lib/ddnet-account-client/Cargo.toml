@@ -1,6 +1,6 @@
 [package]
 name = "ddnet-account-client"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -8,7 +8,7 @@ description = "The account related operations of a client, that want to manage a
 repository = "https://github.com/ddnet/ddnet-accounts"
 
 [dependencies]
-ddnet-accounts-shared = { version = "0.1.0", path = "../ddnet-accounts-shared" }
+ddnet-accounts-shared = { version = "0.2.0", path = "../ddnet-accounts-shared" }
 ddnet-accounts-types = { version = "0.1.0", path = "../ddnet-accounts-types" }
 
 async-trait = "0.1.83"

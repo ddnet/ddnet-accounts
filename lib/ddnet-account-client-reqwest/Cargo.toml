@@ -1,6 +1,6 @@
 [package]
 name = "ddnet-account-client-reqwest"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -8,8 +8,8 @@ description = "The client implementation using reqwest as HTTP client."
 repository = "https://github.com/ddnet/ddnet-accounts"
 
 [dependencies]
-ddnet-account-client-http-fs = { version = "0.1.0", path = "../ddnet-account-client-http-fs" }
-ddnet-account-client = { version = "0.1.0", path = "../ddnet-account-client" }
+ddnet-account-client-http-fs = { version = "0.2.0", path = "../ddnet-account-client-http-fs" }
+ddnet-account-client = { version = "0.2.0", path = "../ddnet-account-client" }
 
 async-trait = "0.1.83"
 url = { version = "2.5.4", features = ["serde"] }

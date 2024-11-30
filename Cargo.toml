@@ -11,7 +11,7 @@ members = [
 
 [package]
 name = "ddnet-accounts"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -24,8 +24,8 @@ name = "account-server"
 
 [dependencies]
 ddnet-accounts-types = { version = "0.1.0", path = "lib/ddnet-accounts-types" }
-ddnet-accounts-shared = { version = "0.1.0", path = "lib/ddnet-accounts-shared" }
-ddnet-account-sql = { version = "0.2.0", path = "lib/ddnet-account-sql", features = ["mysql"] }
+ddnet-accounts-shared = { version = "0.2.0", path = "lib/ddnet-accounts-shared" }
+ddnet-account-sql = { version = "0.3.0", path = "lib/ddnet-account-sql", features = ["mysql"] }
 
 tokio = { version = "1.41.1", features = ["rt-multi-thread", "sync", "fs", "time", "macros"] }
 axum = "0.7.9"
@@ -62,10 +62,10 @@ either = "1.13.0"
 notify = { version = "7.0.0", default-features = false, features = ["macos_kqueue"] }
 
 [dev-dependencies]
-ddnet-account-client = { version = "0.1.0", path = "lib/ddnet-account-client" }
-ddnet-account-game-server = { version = "0.2.0", path = "lib/ddnet-account-game-server" }
-ddnet-account-client-http-fs = { version = "0.1.0", path = "lib/ddnet-account-client-http-fs" }
-ddnet-account-client-reqwest = { version = "0.1.0", path = "lib/ddnet-account-client-reqwest" }
+ddnet-account-client = { version = "0.2.0", path = "lib/ddnet-account-client" }
+ddnet-account-game-server = { version = "0.3.0", path = "lib/ddnet-account-game-server" }
+ddnet-account-client-http-fs = { version = "0.2.0", path = "lib/ddnet-account-client-http-fs" }
+ddnet-account-client-reqwest = { version = "0.2.0", path = "lib/ddnet-account-client-reqwest" }
 
 regex = "1.11.1"
 tempfile = "3.14.0"

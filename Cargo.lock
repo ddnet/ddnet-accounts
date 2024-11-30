@@ -600,7 +600,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "ddnet-account-client"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -618,7 +618,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-account-client-http-fs"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -640,7 +640,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-account-client-reqwest"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -652,7 +652,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-account-game-server"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -666,7 +666,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-account-sql"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -676,7 +676,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-accounts"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "argon2",
@@ -724,7 +724,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-accounts-shared"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "argon2",

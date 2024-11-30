@@ -1,6 +1,6 @@
 [package]
 name = "ddnet-account-game-server"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -9,8 +9,8 @@ repository = "https://github.com/ddnet/ddnet-accounts"
 
 [dependencies]
 ddnet-accounts-types = { version = "0.1.0", path = "../ddnet-accounts-types" }
-ddnet-accounts-shared = { version = "0.1.0", path = "../ddnet-accounts-shared" }
-ddnet-account-sql = { version = "0.2.0", path = "../ddnet-account-sql", default-features = false }
+ddnet-accounts-shared = { version = "0.2.0", path = "../ddnet-accounts-shared" }
+ddnet-account-sql = { version = "0.3.0", path = "../ddnet-account-sql", default-features = false }
 
 sqlx = { version = "0.8.2", features = ["any", "runtime-tokio-rustls", "chrono"] }
 anyhow = { version = "1.0.93", features = ["backtrace"] }
