@@ -3,7 +3,7 @@ pub mod queries;
 use std::sync::Arc;
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         errors::{AccountServerRequestError, Empty},
@@ -11,7 +11,6 @@ use ddnet_accounts_shared::{
     },
     client::logout_all::{IgnoreSession, LogoutAllRequest},
 };
-use sqlx::{Acquire, AnyPool, Connection};
 
 use crate::{
     account_token::queries::{AccountTokenQry, InvalidateAccountToken},
@@ -41,10 +40,10 @@ pub async fn logout_all(
     data: LogoutAllRequest,
 ) -> anyhow::Result<()> {
     let mut connection = pool.acquire().await?;
-    let connection = connection.acquire().await?;
+    let mut connection = connection.acquire().await?;
 
     connection
-        .transaction(|connection| {
+        .transaction(|mut connection| {
             Box::pin(async move {
                 // token data
                 let acc_token_qry = AccountTokenQry {
@@ -52,8 +51,8 @@ pub async fn logout_all(
                 };
 
                 let row = acc_token_qry
-                    .query(connection, &shared.db.account_token_qry_statement)
-                    .fetch_one(&mut **connection)
+                    .query(&shared.db.account_token_qry_statement)
+                    .fetch_one(&mut connection.con())
                     .await?;
 
                 let token_data = AccountTokenQry::row_data(&row)?;
@@ -62,8 +61,8 @@ pub async fn logout_all(
                 let qry = InvalidateAccountToken {
                     token: &data.account_token,
                 };
-                qry.query(connection, &shared.db.invalidate_account_token_statement)
-                    .execute(&mut **connection)
+                qry.query(&shared.db.invalidate_account_token_statement)
+                    .execute(&mut connection.con())
                     .await?;
 
                 anyhow::ensure!(
@@ -96,8 +95,8 @@ pub async fn logout_all(
                     session_data: &session_data,
                 };
 
-                qry.query(connection, &shared.db.remove_sessions_except_statement)
-                    .execute(&mut **connection)
+                qry.query(&shared.db.remove_sessions_except_statement)
+                    .execute(&mut connection.con())
                     .await?;
 
                 anyhow::Ok(())

@@ -1,5 +1,5 @@
-use ddnet_accounts_types::account_id::AccountId;
 use const_oid::{AssociatedOid, ObjectIdentifier};
+use ddnet_accounts_types::account_id::AccountId;
 use serde::{Deserialize, Serialize};
 use x509_cert::{
     ext::{AsExtension, Extension},

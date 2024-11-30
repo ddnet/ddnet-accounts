@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
-use ddnet_account_client::errors::HttpLikeError;
 use async_trait::async_trait;
+use ddnet_account_client::errors::HttpLikeError;
 use url::Url;
 
 #[async_trait]

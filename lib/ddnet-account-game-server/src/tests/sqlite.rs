@@ -1,5 +1,6 @@
+use ddnet_account_sql::any::AnyPool;
 use ddnet_accounts_shared::game_server::user_id::UserId;
-use sqlx::{any::AnyPoolOptions, sqlite::SqliteConnectOptions};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 
 #[tokio::test]
 pub async fn sqlite() -> anyhow::Result<()> {
@@ -7,15 +8,17 @@ pub async fn sqlite() -> anyhow::Result<()> {
     let _ = tokio::fs::remove_file(DB_FILE).await;
     const DB_FILE: &str = "test-db.sqlite";
 
-    let pool = AnyPoolOptions::new()
-        .max_connections(10)
-        .connect_with(
-            SqliteConnectOptions::new()
-                .filename(DB_FILE)
-                .create_if_missing(true)
-                .into(),
-        )
-        .await?;
+    sqlx::any::install_default_drivers();
+    let pool = AnyPool::Sqlite(
+        SqlitePoolOptions::new()
+            .max_connections(10)
+            .connect_with(
+                SqliteConnectOptions::new()
+                    .filename(DB_FILE)
+                    .create_if_missing(true),
+            )
+            .await?,
+    );
 
     // setup
     crate::setup::setup(&pool).await?;

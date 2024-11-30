@@ -3,7 +3,7 @@ pub mod queries;
 use std::{str::FromStr, sync::Arc};
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         account_info::{AccountInfoResponse, CredentialType},
@@ -13,7 +13,6 @@ use ddnet_accounts_shared::{
     client::account_info::AccountInfoRequest,
 };
 use queries::AccountInfo;
-use sqlx::{Acquire, AnyPool};
 
 use crate::shared::{Shared, CERT_MAX_AGE_DELTA, CERT_MIN_AGE_DELTA};
 
@@ -47,7 +46,7 @@ pub async fn account_info(
     );
 
     let mut connection = pool.acquire().await?;
-    let connection = connection.acquire().await?;
+    let mut connection = connection.acquire().await?;
 
     // fetch account info
     let qry = AccountInfo {
@@ -56,8 +55,8 @@ pub async fn account_info(
     };
 
     let row = qry
-        .query(connection, &shared.db.account_info)
-        .fetch_one(connection)
+        .query(&shared.db.account_info)
+        .fetch_one(&mut connection)
         .await?;
 
     let account_info = AccountInfo::row_data(&row)?;

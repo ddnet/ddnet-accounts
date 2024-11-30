@@ -1,9 +1,8 @@
+use anyhow::anyhow;
+use axum::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::machine_id::MachineUid;
 use ddnet_accounts_types::account_id::AccountId;
-use anyhow::anyhow;
-use axum::async_trait;
-use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Row;
 use sqlx::Statement;
@@ -21,24 +20,24 @@ pub struct AccountInfoData {
 }
 
 #[async_trait]
-impl<'a> Query<AccountInfoData> for AccountInfo<'a> {
+impl Query<AccountInfoData> for AccountInfo<'_> {
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/account_info.sql"))
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement
             .query()
             .bind(self.session_pub_key.as_slice())
             .bind(self.session_hw_id.as_slice())
     }
-    fn row_data(row: &AnyRow) -> anyhow::Result<AccountInfoData> {
+    fn row_data_mysql(row: &sqlx::mysql::MySqlRow) -> anyhow::Result<AccountInfoData> {
         Ok(AccountInfoData {
             account_id: row
                 .try_get("account_id")

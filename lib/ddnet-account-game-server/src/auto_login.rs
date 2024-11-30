@@ -2,10 +2,9 @@ pub(crate) mod queries;
 
 use std::sync::Arc;
 
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::game_server::user_id::UserId;
 use ddnet_accounts_types::account_id::AccountId;
-use sqlx::Acquire;
 use thiserror::Error;
 
 use crate::shared::Shared;
@@ -42,7 +41,7 @@ pub fn default_name(account_id: &AccountId) -> String {
 /// information to the account now.
 pub async fn auto_login(
     shared: Arc<Shared>,
-    pool: &sqlx::AnyPool,
+    pool: &AnyPool,
     user_id: &UserId,
 ) -> anyhow::Result<bool, AutoLoginError> {
     if let Some(account_id) = &user_id.account_id {
@@ -50,7 +49,7 @@ pub async fn auto_login(
             .acquire()
             .await
             .map_err(|err| AutoLoginError::Database(err.into()))?;
-        let con = pool_con
+        let mut con = pool_con
             .acquire()
             .await
             .map_err(|err| AutoLoginError::Database(err.into()))?;
@@ -62,8 +61,8 @@ pub async fn auto_login(
         };
 
         let res = qry
-            .query(con, &shared.db.register_user_statement)
-            .execute(&mut *con)
+            .query(&shared.db.register_user_statement)
+            .execute(&mut con)
             .await
             .map_err(|err| AutoLoginError::Database(err.into()))?;
 

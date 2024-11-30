@@ -51,7 +51,7 @@ use credential_auth_token::{
     credential_auth_token_email, credential_auth_token_steam, queries::AddCredentialAuthToken,
 };
 use db::DbConnectionShared;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::account_server::{
     errors::AccountServerRequestError, result::AccountServerReqResult,
 };
@@ -77,7 +77,8 @@ use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use shared::Shared;
 use sign::{queries::AuthAttempt, sign_request};
-use sqlx::{any::AnyPoolOptions, mysql::MySqlConnectOptions, Any, AnyPool, Pool};
+use sqlx::mysql::MySqlConnectOptions;
+use sqlx::mysql::MySqlPoolOptions;
 use std::{
     net::SocketAddr,
     num::NonZeroU32,
@@ -243,32 +244,36 @@ struct Details {
     limitter: LimiterSettings,
 }
 
-pub(crate) async fn prepare_db(details: &DbDetails) -> anyhow::Result<Pool<Any>> {
+pub(crate) async fn prepare_db(details: &DbDetails) -> anyhow::Result<AnyPool> {
     let is_localhost =
         details.host == "localhost" || details.host == "127.0.0.1" || details.host == "::1";
-    Ok(AnyPoolOptions::new()
-        .max_connections(200)
-        .connect_with(
-            MySqlConnectOptions::new()
-                .charset("utf8mb4")
-                .host(&details.host)
-                .port(details.port)
-                .database(&details.database)
-                .username(&details.username)
-                .password(&details.password)
-                .ssl_mode(if !is_localhost {
-                    sqlx::mysql::MySqlSslMode::Required
-                } else {
-                    sqlx::mysql::MySqlSslMode::Preferred
-                })
-                .ssl_ca(&details.ca_cert_path)
-                .into(),
-        )
-        .await?)
+
+    sqlx::any::install_default_drivers();
+    Ok(AnyPool::MySql(
+        MySqlPoolOptions::new()
+            .max_connections(200)
+            .connect_with(
+                MySqlConnectOptions::new()
+                    .charset("utf8mb4")
+                    .host(&details.host)
+                    .port(details.port)
+                    .database(&details.database)
+                    .username(&details.username)
+                    .password(&details.password)
+                    .ssl_mode(if !is_localhost {
+                        sqlx::mysql::MySqlSslMode::Required
+                    } else {
+                        sqlx::mysql::MySqlSslMode::Preferred
+                    })
+                    .ssl_ca(&details.ca_cert_path),
+            )
+            .await?,
+    ))
 }
 
-pub(crate) async fn prepare_statements(pool: &Pool<Any>) -> anyhow::Result<DbConnectionShared> {
+pub(crate) async fn prepare_statements(pool: &AnyPool) -> anyhow::Result<DbConnectionShared> {
     let mut connection = pool.acquire().await?;
+    let mut connection = connection.acquire().await?;
 
     // now prepare the statements
     let credential_auth_token_statement = AddCredentialAuthToken::prepare(&mut connection).await?;
@@ -369,7 +374,7 @@ pub(crate) async fn prepare_http(
     db: DbConnectionShared,
     email: EmailShared,
     steam: SteamShared,
-    pool: &Pool<Any>,
+    pool: &AnyPool,
     settings: &LimiterSettings,
 ) -> anyhow::Result<(TcpListener, Router, Arc<Shared>)> {
     let keys = tokio::fs::read("signing_keys.json")
@@ -673,7 +678,7 @@ pub(crate) async fn prepare_http(
 
 pub(crate) async fn prepare(
     details: &Details,
-) -> anyhow::Result<(TcpListener, Router, Pool<Any>, Arc<Shared>)> {
+) -> anyhow::Result<(TcpListener, Router, AnyPool, Arc<Shared>)> {
     // first connect to the database
     let pool = prepare_db(&details.db).await?;
 

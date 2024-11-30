@@ -1,10 +1,10 @@
 use std::{num::NonZeroU32, sync::Arc, time::Duration};
 
 use axum::{extract::Query, response::IntoResponse, routing::get, Router};
+use ddnet_account_sql::any::AnyPool;
 use lettre::SmtpTransport;
 use parking_lot::Mutex;
 use serde::Deserialize;
-use sqlx::{Any, Pool};
 use tokio::{net::TcpSocket, task::JoinHandle};
 
 use crate::{
@@ -14,7 +14,7 @@ use crate::{
     steam::{self, SteamHook, SteamShared},
 };
 
-pub async fn test_setup() -> anyhow::Result<Pool<Any>> {
+pub async fn test_setup() -> anyhow::Result<AnyPool> {
     prepare_db(&crate::DbDetails {
         host: "localhost".into(),
         port: 3306,
@@ -28,7 +28,7 @@ pub async fn test_setup() -> anyhow::Result<Pool<Any>> {
 
 pub struct TestAccServer {
     pub(crate) server: JoinHandle<anyhow::Result<()>>,
-    pub(crate) pool: Pool<Any>,
+    pub(crate) pool: AnyPool,
     pub(crate) shared: Arc<Shared>,
     pub(crate) steam: JoinHandle<anyhow::Result<()>>,
 }
@@ -221,12 +221,12 @@ impl TestAccServer {
 }
 
 pub struct TestGameServer {
-    pool: Pool<Any>,
+    pool: AnyPool,
     pub(crate) game_server_data: Arc<ddnet_account_game_server::shared::Shared>,
 }
 
 impl TestGameServer {
-    pub(crate) async fn new(pool: &Pool<Any>) -> anyhow::Result<Self> {
+    pub(crate) async fn new(pool: &AnyPool) -> anyhow::Result<Self> {
         // make sure the tables are gone
         let _ = ddnet_account_game_server::setup::delete(pool).await;
         ddnet_account_game_server::setup::setup(pool).await?;

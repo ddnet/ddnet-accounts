@@ -3,7 +3,7 @@ pub mod queries;
 use std::sync::Arc;
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         errors::{AccountServerRequestError, Empty},
@@ -11,7 +11,6 @@ use ddnet_accounts_shared::{
     },
     client::logout::LogoutRequest,
 };
-use sqlx::{Acquire, AnyPool};
 
 use crate::shared::{Shared, CERT_MAX_AGE_DELTA, CERT_MIN_AGE_DELTA};
 
@@ -45,7 +44,7 @@ pub async fn logout(shared: Arc<Shared>, pool: AnyPool, data: LogoutRequest) -> 
     );
 
     let mut connection = pool.acquire().await?;
-    let connection = connection.acquire().await?;
+    let mut connection = connection.acquire().await?;
 
     // remove this session
     let qry = RemoveSession {
@@ -53,8 +52,8 @@ pub async fn logout(shared: Arc<Shared>, pool: AnyPool, data: LogoutRequest) -> 
         hw_id: &data.account_data.hw_id,
     };
 
-    qry.query(connection, &shared.db.logout_statement)
-        .execute(connection)
+    qry.query(&shared.db.logout_statement)
+        .execute(&mut connection)
         .await?;
 
     Ok(())

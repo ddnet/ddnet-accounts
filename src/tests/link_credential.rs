@@ -5,13 +5,13 @@ use ddnet_account_client::{
     certs::{certs_to_pub_keys, download_certs},
     link_credential::LinkCredentialResult,
 };
+use ddnet_account_client_reqwest::client::ClientReqwestTokioFs;
 use ddnet_accounts_shared::{
     client::{
         account_token::AccountTokenOperation, credential_auth_token::CredentialAuthTokenOperation,
     },
     game_server,
 };
-use ddnet_account_client_reqwest::client::ClientReqwestTokioFs;
 use email_address::EmailAddress;
 use parking_lot::Mutex;
 

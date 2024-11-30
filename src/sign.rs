@@ -3,7 +3,7 @@ pub mod queries;
 use std::{str::FromStr, sync::Arc, time::Duration};
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         cert_account_ext::{AccountCertData, AccountCertExt},
@@ -14,7 +14,6 @@ use ddnet_accounts_shared::{
     client::sign::SignRequest,
 };
 use p256::ecdsa::DerSignature;
-use sqlx::{Acquire, AnyPool};
 use x509_cert::builder::Builder;
 use x509_cert::der::Encode;
 use x509_cert::{
@@ -58,12 +57,12 @@ pub async fn sign(
     );
 
     let mut connection = pool.acquire().await?;
-    let connection = connection.acquire().await?;
+    let mut connection = connection.acquire().await?;
 
     let qry = AuthAttempt { data: &data };
     let row = qry
-        .query(connection, &shared.db.auth_attempt_statement)
-        .fetch_one(connection)
+        .query(&shared.db.auth_attempt_statement)
+        .fetch_one(&mut connection)
         .await?;
     let auth_data = AuthAttempt::row_data(&row)?;
 

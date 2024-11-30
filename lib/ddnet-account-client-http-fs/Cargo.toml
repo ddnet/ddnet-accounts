@@ -12,15 +12,15 @@ ddnet-accounts-shared = { version = "0.1.0", path = "../ddnet-accounts-shared" }
 ddnet-accounts-types = { version = "0.1.0", path = "../ddnet-accounts-types" }
 ddnet-account-client = { version = "0.1.0", path = "../ddnet-account-client" }
 
-anyhow = { version = "1.0.86", features = ["backtrace"] }
+anyhow = { version = "1.0.93", features = ["backtrace"] }
 parking_lot = "0.12.3"
-async-trait = "0.1.81"
-url = { version = "2.5.2", features = ["serde"] }
-tokio = { version = "1.39.3", features = ["rt-multi-thread", "sync", "fs", "time", "macros"] }
-serde = { version = "1.0.208", features = ["derive"] }
-serde_json = "1.0.125"
+async-trait = "0.1.83"
+url = { version = "2.5.4", features = ["serde"] }
+tokio = { version = "1.41.1", features = ["rt-multi-thread", "sync", "fs", "time", "macros"] }
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
 email_address = { version = "0.2.9", features = ["serde"] }
-tempfile = "3.12.0"
+tempfile = "3.14.0"
 x509-cert = { version = "0.2.5" }
 either = "1.13.0"
 chrono = { version = "0.4.38", features = ["serde"] }
