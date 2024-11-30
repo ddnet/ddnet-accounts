@@ -3,7 +3,7 @@ pub mod queries;
 use std::sync::Arc;
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         credential_auth_token::CredentialAuthTokenError, errors::AccountServerRequestError,
@@ -14,7 +14,6 @@ use ddnet_accounts_shared::{
         CredentialAuthTokenSteamRequest,
     },
 };
-use sqlx::{Acquire, AnyPool};
 
 use crate::{
     credential_auth_token::queries::AddCredentialAuthToken, shared::Shared, types::TokenType,
@@ -96,11 +95,11 @@ pub async fn credential_auth_token_email_impl(
         op: &data.op,
     };
     let mut connection = pool.acquire().await?;
-    let con = connection.acquire().await?;
+    let mut con = connection.acquire().await?;
 
     let credential_auth_token_res = query_add_credential_auth_token
-        .query(con, &shared.db.credential_auth_token_statement)
-        .execute(&mut *con)
+        .query(&shared.db.credential_auth_token_statement)
+        .execute(&mut con)
         .await?;
     anyhow::ensure!(
         credential_auth_token_res.rows_affected() >= 1,
@@ -173,11 +172,11 @@ pub async fn credential_auth_token_steam_impl(
         op: &data.op,
     };
     let mut connection = pool.acquire().await?;
-    let con = connection.acquire().await?;
+    let mut con = connection.acquire().await?;
 
     let credential_auth_token_res = query_add_credential_auth_token
-        .query(con, &shared.db.credential_auth_token_statement)
-        .execute(&mut *con)
+        .query(&shared.db.credential_auth_token_statement)
+        .execute(&mut con)
         .await?;
     anyhow::ensure!(
         credential_auth_token_res.rows_affected() >= 1,

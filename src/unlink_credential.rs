@@ -3,7 +3,7 @@ pub mod queries;
 use std::{str::FromStr, sync::Arc};
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         errors::{AccountServerRequestError, Empty},
@@ -12,7 +12,6 @@ use ddnet_accounts_shared::{
     client::unlink_credential::UnlinkCredentialRequest,
 };
 use queries::{UnlinkCredentialByEmail, UnlinkCredentialBySteam};
-use sqlx::{Acquire, AnyPool, Connection};
 
 use crate::{
     login::get_and_invalidate_credential_auth_token,
@@ -40,15 +39,15 @@ pub async fn unlink_credential(
     data: UnlinkCredentialRequest,
 ) -> anyhow::Result<()> {
     let mut connection = pool.acquire().await?;
-    let connection = connection.acquire().await?;
+    let mut connection = connection.acquire().await?;
 
     connection
-        .transaction(|connection| {
+        .transaction(|mut connection| {
             Box::pin(async move {
                 let token_data = get_and_invalidate_credential_auth_token(
                     &shared,
                     data.credential_auth_token,
-                    connection,
+                    &mut connection.con(),
                 )
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("Credential auth token is invalid/expired."))?;
@@ -64,8 +63,8 @@ pub async fn unlink_credential(
                         // remove the current email, if exists.
                         let qry = UnlinkCredentialByEmail { email: &email };
 
-                        qry.query(connection, &shared.db.unlink_credential_by_email_statement)
-                            .execute(&mut **connection)
+                        qry.query(&shared.db.unlink_credential_by_email_statement)
+                            .execute(&mut connection.con())
                             .await?
                             .rows_affected()
                     }
@@ -76,8 +75,8 @@ pub async fn unlink_credential(
                             steamid64: &steamid64,
                         };
 
-                        qry.query(connection, &shared.db.unlink_credential_by_steam_statement)
-                            .execute(&mut **connection)
+                        qry.query(&shared.db.unlink_credential_by_steam_statement)
+                            .execute(&mut connection.con())
                             .await?
                             .rows_affected()
                     }

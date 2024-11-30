@@ -3,7 +3,10 @@ pub mod queries;
 use std::{str::FromStr, sync::Arc};
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{
+    any::{AnyConnection, AnyPool},
+    query::Query,
+};
 use ddnet_accounts_shared::{
     account_server::{
         errors::AccountServerRequestError, login::LoginError, result::AccountServerReqResult,
@@ -15,7 +18,6 @@ use queries::{
     AccountIdFromEmail, AccountIdFromLastInsert, AccountIdFromSteam, CredentialAuthTokenData,
     LinkAccountCredentialEmail, LinkAccountCredentialSteam,
 };
-use sqlx::{Acquire, AnyConnection, AnyPool, Connection};
 
 use crate::{
     shared::Shared,
@@ -45,7 +47,7 @@ enum LoginResponse {
 pub async fn get_and_invalidate_credential_auth_token(
     shared: &Arc<Shared>,
     credential_auth_token: CredentialAuthToken,
-    connection: &mut AnyConnection,
+    connection: &mut AnyConnection<'_>,
 ) -> anyhow::Result<Option<CredentialAuthTokenData>> {
     // token data
     let credential_auth_token_qry = CredentialAuthTokenQry {
@@ -53,7 +55,7 @@ pub async fn get_and_invalidate_credential_auth_token(
     };
 
     let row = credential_auth_token_qry
-        .query(connection, &shared.db.credential_auth_token_qry_statement)
+        .query(&shared.db.credential_auth_token_qry_statement)
         .fetch_optional(connection)
         .await?;
 
@@ -78,15 +80,15 @@ pub async fn login(
         )?;
 
         let mut connection = pool.acquire().await?;
-        let connection = connection.acquire().await?;
+        let mut connection = connection.acquire().await?;
 
         let res = connection
-            .transaction(|connection| {
+            .transaction(|mut connection| {
                 Box::pin(async move {
                     let token_data = get_and_invalidate_credential_auth_token(
                         &shared,
                         data.credential_auth_token,
-                        connection,
+                        &mut connection.con(),
                     )
                     .await?;
 
@@ -114,12 +116,9 @@ pub async fn login(
                     let qry = InvalidateCredentialAuthToken {
                         token: &data.credential_auth_token,
                     };
-                    qry.query(
-                        connection,
-                        &shared.db.invalidate_credential_auth_token_statement,
-                    )
-                    .execute(&mut **connection)
-                    .await?;
+                    qry.query(&shared.db.invalidate_credential_auth_token_statement)
+                        .execute(&mut connection.con())
+                        .await?;
 
                     // create account (if not exists)
                     let account_id = match &identifier {
@@ -128,8 +127,8 @@ pub async fn login(
                             let qry = AccountIdFromEmail { email };
 
                             let row = qry
-                                .query(connection, &shared.db.account_id_from_email_qry_statement)
-                                .fetch_optional(&mut **connection)
+                                .query(&shared.db.account_id_from_email_qry_statement)
+                                .fetch_optional(&mut connection.con())
                                 .await?;
 
                             row.map(|row| AccountIdFromEmail::row_data(&row))
@@ -141,8 +140,8 @@ pub async fn login(
                             let qry = AccountIdFromSteam { steamid64 };
 
                             let row = qry
-                                .query(connection, &shared.db.account_id_from_steam_qry_statement)
-                                .fetch_optional(&mut **connection)
+                                .query(&shared.db.account_id_from_steam_qry_statement)
+                                .fetch_optional(&mut connection.con())
                                 .await?;
 
                             row.map(|row| AccountIdFromSteam::row_data(&row))
@@ -157,8 +156,8 @@ pub async fn login(
                             let qry = TryCreateAccount {};
 
                             let res = qry
-                                .query(connection, &shared.db.try_create_account_statement)
-                                .execute(&mut **connection)
+                                .query(&shared.db.try_create_account_statement)
+                                .execute(&mut connection.con())
                                 .await?;
 
                             anyhow::ensure!(res.rows_affected() >= 1, "account was not created");
@@ -166,11 +165,8 @@ pub async fn login(
                             // query account data
                             let login_qry = AccountIdFromLastInsert {};
                             let row = login_qry
-                                .query(
-                                    connection,
-                                    &shared.db.account_id_from_last_insert_qry_statement,
-                                )
-                                .fetch_one(&mut **connection)
+                                .query(&shared.db.account_id_from_last_insert_qry_statement)
+                                .fetch_one(&mut connection.con())
                                 .await?;
 
                             let login_data = AccountIdFromLastInsert::row_data(&row)?;
@@ -183,11 +179,8 @@ pub async fn login(
                                     };
 
                                     let res = qry
-                                        .query(
-                                            connection,
-                                            &shared.db.link_credentials_email_qry_statement,
-                                        )
-                                        .execute(&mut **connection)
+                                        .query(&shared.db.link_credentials_email_qry_statement)
+                                        .execute(&mut connection.con())
                                         .await?;
 
                                     anyhow::ensure!(
@@ -202,11 +195,8 @@ pub async fn login(
                                     };
 
                                     let res = qry
-                                        .query(
-                                            connection,
-                                            &shared.db.link_credentials_steam_qry_statement,
-                                        )
-                                        .execute(&mut **connection)
+                                        .query(&shared.db.link_credentials_steam_qry_statement)
+                                        .execute(&mut connection.con())
                                         .await?;
 
                                     anyhow::ensure!(
@@ -225,8 +215,8 @@ pub async fn login(
                         pub_key: data.account_data.public_key.as_bytes(),
                     };
 
-                    qry.query(connection, &shared.db.create_session_statement)
-                        .execute(&mut **connection)
+                    qry.query(&shared.db.create_session_statement)
+                        .execute(&mut connection.con())
                         .await?;
 
                     anyhow::Ok(LoginResponse::Success(account_id))

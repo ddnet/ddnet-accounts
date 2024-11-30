@@ -1,7 +1,6 @@
 use anyhow::anyhow;
 use axum::async_trait;
 use ddnet_account_sql::query::Query;
-use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Row;
 use sqlx::Statement;
@@ -14,19 +13,19 @@ pub struct AddCert<'a> {
 #[async_trait]
 impl Query<()> for AddCert<'_> {
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/add_cert.sql"))
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.cert_der).bind(self.valid_until)
     }
-    fn row_data(_row: &AnyRow) -> anyhow::Result<()> {
+    fn row_data_mysql(_row: &sqlx::mysql::MySqlRow) -> anyhow::Result<()> {
         Err(anyhow!("Row data is not supported"))
     }
 }
@@ -40,19 +39,19 @@ pub struct SingleCertData {
 #[async_trait]
 impl Query<SingleCertData> for GetCerts {
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/get_certs.sql"))
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query()
     }
-    fn row_data(row: &AnyRow) -> anyhow::Result<SingleCertData> {
+    fn row_data_mysql(row: &sqlx::mysql::MySqlRow) -> anyhow::Result<SingleCertData> {
         Ok(SingleCertData {
             cert_der: row
                 .try_get("cert_der")

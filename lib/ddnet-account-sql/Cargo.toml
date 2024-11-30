@@ -8,10 +8,10 @@ description = "Helpers for SQL databases."
 repository = "https://github.com/ddnet/ddnet-accounts"
 
 [dependencies]
-# https://github.com/launchbadge/sqlx/issues/2636
-sqlx = { version = "=0.6.3", features = ["any", "runtime-tokio-rustls", "chrono"] }
+sqlx = { version = "0.8.2", features = ["any", "runtime-tokio-rustls", "chrono"] }
 async-trait = "0.1.83"
 anyhow = { version = "1.0.93", features = ["backtrace"] }
+futures = "0.3.31"
 
 [features]
 mysql = ["sqlx/mysql"]

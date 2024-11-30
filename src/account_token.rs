@@ -3,7 +3,7 @@ pub mod queries;
 use std::sync::Arc;
 
 use axum::Json;
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         account_token::AccountTokenError, errors::AccountServerRequestError, otp::generate_otp,
@@ -14,7 +14,6 @@ use ddnet_accounts_shared::{
     },
 };
 use queries::{AddAccountTokenEmail, AddAccountTokenSteam};
-use sqlx::{Acquire, AnyPool};
 
 use crate::shared::Shared;
 
@@ -75,11 +74,11 @@ pub async fn account_token_email_impl(
         ty: &data.op,
     };
     let mut connection = pool.acquire().await?;
-    let con = connection.acquire().await?;
+    let mut con = connection.acquire().await?;
 
     let account_token_res = query_add_account_token
-        .query(con, &shared.db.account_token_email_statement)
-        .execute(&mut *con)
+        .query(&shared.db.account_token_email_statement)
+        .execute(&mut con)
         .await?;
     anyhow::ensure!(
         account_token_res.rows_affected() >= 1,
@@ -148,11 +147,11 @@ pub async fn account_token_steam_impl(
         ty: &data.op,
     };
     let mut connection = pool.acquire().await?;
-    let con = connection.acquire().await?;
+    let mut con = connection.acquire().await?;
 
     let account_token_res = query_add_account_token
-        .query(con, &shared.db.account_token_steam_statement)
-        .execute(&mut *con)
+        .query(&shared.db.account_token_steam_statement)
+        .execute(&mut con)
         .await?;
     anyhow::ensure!(
         account_token_res.rows_affected() >= 1,

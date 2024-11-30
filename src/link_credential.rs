@@ -3,7 +3,7 @@ pub mod queries;
 use std::{str::FromStr, sync::Arc};
 
 use axum::Json;
-use ddnet_account_sql::{is_duplicate_entry, query::Query};
+use ddnet_account_sql::{any::AnyPool, is_duplicate_entry, query::Query};
 use ddnet_accounts_shared::{
     account_server::{
         errors::{AccountServerRequestError, Empty},
@@ -14,7 +14,6 @@ use ddnet_accounts_shared::{
     },
 };
 use queries::{UnlinkCredentialEmail, UnlinkCredentialSteam};
-use sqlx::{Acquire, AnyPool, Connection};
 
 use crate::{
     account_token::queries::{AccountTokenQry, InvalidateAccountToken},
@@ -46,10 +45,10 @@ pub async fn link_credential(
     data: LinkCredentialRequest,
 ) -> anyhow::Result<()> {
     let mut connection = pool.acquire().await?;
-    let connection = connection.acquire().await?;
+    let mut connection = connection.acquire().await?;
 
     connection
-        .transaction(|connection| {
+        .transaction(|mut connection| {
             Box::pin(async move {
                 // token data
                 let acc_token_qry = AccountTokenQry {
@@ -57,8 +56,8 @@ pub async fn link_credential(
                 };
 
                 let row = acc_token_qry
-                    .query(connection, &shared.db.account_token_qry_statement)
-                    .fetch_one(&mut **connection)
+                    .query(&shared.db.account_token_qry_statement)
+                    .fetch_one(&mut connection.con())
                     .await?;
 
                 let token_data = AccountTokenQry::row_data(&row)?;
@@ -67,8 +66,8 @@ pub async fn link_credential(
                 let qry = InvalidateAccountToken {
                     token: &data.account_token,
                 };
-                qry.query(connection, &shared.db.invalidate_account_token_statement)
-                    .execute(&mut **connection)
+                qry.query(&shared.db.invalidate_account_token_statement)
+                    .execute(&mut connection.con())
                     .await?;
 
                 anyhow::ensure!(
@@ -80,7 +79,7 @@ pub async fn link_credential(
                 let token_data = get_and_invalidate_credential_auth_token(
                     &shared,
                     data.credential_auth_token,
-                    connection,
+                    &mut connection.con(),
                 )
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("Credential auth token is invalid/expired."))?;
@@ -97,8 +96,8 @@ pub async fn link_credential(
                             account_id: &account_id,
                         };
 
-                        qry.query(connection, &shared.db.unlink_credential_email_statement)
-                            .execute(&mut **connection)
+                        qry.query(&shared.db.unlink_credential_email_statement)
+                            .execute(&mut connection.con())
                             .await?;
 
                         // add the new email.
@@ -108,8 +107,8 @@ pub async fn link_credential(
                         };
 
                         let res = qry
-                            .query(connection, &shared.db.link_credentials_email_qry_statement)
-                            .execute(&mut **connection)
+                            .query(&shared.db.link_credentials_email_qry_statement)
+                            .execute(&mut connection.con())
                             .await;
 
                         anyhow::ensure!(
@@ -125,8 +124,8 @@ pub async fn link_credential(
                             account_id: &account_id,
                         };
 
-                        qry.query(connection, &shared.db.unlink_credential_steam_statement)
-                            .execute(&mut **connection)
+                        qry.query(&shared.db.unlink_credential_steam_statement)
+                            .execute(&mut connection.con())
                             .await?;
 
                         // add the new steam.
@@ -136,8 +135,8 @@ pub async fn link_credential(
                         };
 
                         let res = qry
-                            .query(connection, &shared.db.link_credentials_steam_qry_statement)
-                            .execute(&mut **connection)
+                            .query(&shared.db.link_credentials_steam_qry_statement)
+                            .execute(&mut connection.con())
                             .await;
 
                         anyhow::ensure!(

@@ -30,8 +30,7 @@ ddnet-account-sql = { version = "0.2.0", path = "lib/ddnet-account-sql", feature
 tokio = { version = "1.41.1", features = ["rt-multi-thread", "sync", "fs", "time", "macros"] }
 axum = "0.7.9"
 anyhow = { version = "1.0.93", features = ["backtrace"] }
-# https://github.com/launchbadge/sqlx/issues/2636
-sqlx = { version = "=0.6.3", features = ["mysql", "any", "runtime-tokio-rustls", "chrono"] }
+sqlx = { version = "0.8.2", features = ["mysql", "any", "runtime-tokio-rustls", "chrono"] }
 email_address = { version = "0.2.9", features = ["serde"] }
 ed25519-dalek = { version = "2.1.1", features = ["serde", "pkcs8"] }
 async-trait = "0.1.83"
@@ -53,14 +52,14 @@ sha2 = { version = "0.10", features = ["oid"] }
 der = { version = "0.7.9", features = ["derive"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 tower_governor = "0.4.3"
-tower = "0.4.13"
+tower = "0.5.1"
 strum = { version = "0.26.3", features = ["derive"] }
 reqwest = { version = "0.12.9" }
 hex = "0.4.3"
 iprange = "0.6.7"
 ipnet = "2.10.1"
 either = "1.13.0"
-notify = { version = "6.1.1", default-features = false, features = ["macos_kqueue"] }
+notify = { version = "7.0.0", default-features = false, features = ["macos_kqueue"] }
 
 [dev-dependencies]
 ddnet-account-client = { version = "0.1.0", path = "lib/ddnet-account-client" }

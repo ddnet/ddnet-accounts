@@ -2,7 +2,6 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_types::account_id::AccountId;
-use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Statement;
 
@@ -20,16 +19,16 @@ pub struct RegisterUser<'a> {
 impl Query<()> for RegisterUser<'_> {
     #[cfg(feature = "mysql")]
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/try_insert_user.sql"))
             .await?)
     }
     #[cfg(feature = "sqlite")]
     async fn prepare_sqlite(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::sqlite::SqliteConnection,
+    ) -> anyhow::Result<sqlx::sqlite::SqliteStatement<'static>> {
         Ok(connection
             .prepare(include_str!("sqlite/try_insert_user.sql"))
             .await?)
@@ -37,8 +36,8 @@ impl Query<()> for RegisterUser<'_> {
     #[cfg(feature = "mysql")]
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         let account_id = self.account_id;
 
         statement.query().bind(self.default_name).bind(account_id)
@@ -46,13 +45,21 @@ impl Query<()> for RegisterUser<'_> {
     #[cfg(feature = "sqlite")]
     fn query_sqlite<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::sqlite::SqliteStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'b>> {
         let account_id = self.account_id;
 
         statement.query().bind(self.default_name).bind(account_id)
     }
-    fn row_data(_row: &AnyRow) -> anyhow::Result<()> {
+    #[cfg(feature = "mysql")]
+    fn row_data_mysql(_row: &sqlx::mysql::MySqlRow) -> anyhow::Result<()> {
+        Err(anyhow!(
+            "Data rows are not supported for this query.
+            You probably want to check affected rows instead."
+        ))
+    }
+    #[cfg(feature = "sqlite")]
+    fn row_data_sqlite(_row: &sqlx::sqlite::SqliteRow) -> anyhow::Result<()> {
         Err(anyhow!(
             "Data rows are not supported for this query.
             You probably want to check affected rows instead."

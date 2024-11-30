@@ -1,14 +1,13 @@
+use ddnet_account_sql::any::AnyConnection;
+use ddnet_account_sql::any::AnyPool;
 use ddnet_account_sql::version::get_version;
 use ddnet_account_sql::version::set_version;
-use sqlx::Acquire;
-use sqlx::AnyConnection;
-use sqlx::Connection;
 use sqlx::Executor;
 use sqlx::Statement;
 
 const VERSION_NAME: &str = "account-server";
 
-async fn setup_version1_mysql(con: &mut AnyConnection) -> anyhow::Result<()> {
+async fn setup_version1_mysql(con: &mut sqlx::mysql::MySqlConnection) -> anyhow::Result<()> {
     // first create all statements (syntax check)
     let account = con.prepare(include_str!("setup/mysql/account.sql")).await?;
     let credential_email = con
@@ -35,28 +34,28 @@ async fn setup_version1_mysql(con: &mut AnyConnection) -> anyhow::Result<()> {
     session.query().execute(&mut *con).await?;
     certs.query().execute(&mut *con).await?;
 
-    set_version(con, VERSION_NAME, 1).await?;
+    set_version(&mut AnyConnection::MySql(&mut *con), VERSION_NAME, 1).await?;
 
     Ok(())
 }
 
-pub async fn setup_version1(con: &mut AnyConnection) -> anyhow::Result<()> {
-    match con.kind() {
-        sqlx::any::AnyKind::MySql => setup_version1_mysql(con).await,
+pub async fn setup_version1(con: &mut AnyConnection<'_>) -> anyhow::Result<()> {
+    match con {
+        AnyConnection::MySql(con) => setup_version1_mysql(con).await,
     }
 }
 
-pub async fn setup(pool: &sqlx::AnyPool) -> anyhow::Result<()> {
+pub async fn setup(pool: &AnyPool) -> anyhow::Result<()> {
     tokio::fs::create_dir_all("config").await?;
 
     let mut pool_con = pool.acquire().await?;
-    let con = pool_con.acquire().await?;
+    let mut con = pool_con.acquire().await?;
 
-    con.transaction(|con| {
+    con.transaction(|mut con| {
         Box::pin(async move {
-            let version = get_version(con, VERSION_NAME).await?;
+            let version = get_version(&mut con.con(), VERSION_NAME).await?;
             if version < 1 {
-                setup_version1(&mut *con).await?;
+                setup_version1(&mut con.con()).await?;
             }
 
             anyhow::Ok(())
@@ -65,10 +64,7 @@ pub async fn setup(pool: &sqlx::AnyPool) -> anyhow::Result<()> {
     .await
 }
 
-async fn delete_mysql(pool: &sqlx::AnyPool) -> anyhow::Result<()> {
-    let mut pool_con = pool.acquire().await?;
-    let con = pool_con.acquire().await?;
-
+async fn delete_mysql(con: &mut sqlx::mysql::MySqlConnection) -> anyhow::Result<()> {
     // first create all statements (syntax check)
     // delete in reverse order to creating
     let session = con
@@ -104,7 +100,7 @@ async fn delete_mysql(pool: &sqlx::AnyPool) -> anyhow::Result<()> {
     let account = account.query().execute(&mut *con).await;
     let certs = certs.query().execute(&mut *con).await;
 
-    let _ = set_version(con, VERSION_NAME, 0).await;
+    let _ = set_version(&mut AnyConnection::MySql(&mut *con), VERSION_NAME, 0).await;
 
     // handle errors at once
     session
@@ -118,10 +114,12 @@ async fn delete_mysql(pool: &sqlx::AnyPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn delete(pool: &sqlx::AnyPool) -> anyhow::Result<()> {
-    match pool.any_kind() {
-        sqlx::any::AnyKind::MySql => {
-            let _ = delete_mysql(pool).await;
+pub async fn delete(pool: &AnyPool) -> anyhow::Result<()> {
+    let mut con = pool.acquire().await?;
+    let con = con.acquire().await?;
+    match con {
+        AnyConnection::MySql(con) => {
+            let _ = delete_mysql(con).await;
         }
     }
 

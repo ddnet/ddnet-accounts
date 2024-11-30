@@ -1,4 +1,4 @@
-use sqlx::any::AnyStatement;
+use ddnet_account_sql::any::AnyStatement;
 
 /// Shared data for a db connection
 pub struct DbConnectionShared {

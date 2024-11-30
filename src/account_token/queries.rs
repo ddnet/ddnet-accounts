@@ -5,7 +5,6 @@ use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::account_token::AccountToken;
 use ddnet_accounts_types::account_id::AccountId;
-use sqlx::any::AnyRow;
 use sqlx::Executor;
 use sqlx::Row;
 use sqlx::Statement;
@@ -22,16 +21,16 @@ pub struct AddAccountTokenEmail<'a> {
 #[async_trait]
 impl Query<()> for AddAccountTokenEmail<'_> {
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/add_account_token_email.sql"))
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         let ty: &'static str = self.ty.into();
         statement
             .query()
@@ -39,7 +38,7 @@ impl Query<()> for AddAccountTokenEmail<'_> {
             .bind(self.email.as_str())
             .bind(ty)
     }
-    fn row_data(_row: &AnyRow) -> anyhow::Result<()> {
+    fn row_data_mysql(_row: &sqlx::mysql::MySqlRow) -> anyhow::Result<()> {
         Err(anyhow!("Row data is not supported"))
     }
 }
@@ -54,16 +53,16 @@ pub struct AddAccountTokenSteam<'a> {
 #[async_trait]
 impl Query<()> for AddAccountTokenSteam<'_> {
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/add_account_token_steam.sql"))
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         let ty: &'static str = self.ty.into();
         statement
             .query()
@@ -71,7 +70,7 @@ impl Query<()> for AddAccountTokenSteam<'_> {
             .bind(self.steamid64)
             .bind(ty)
     }
-    fn row_data(_row: &AnyRow) -> anyhow::Result<()> {
+    fn row_data_mysql(_row: &sqlx::mysql::MySqlRow) -> anyhow::Result<()> {
         Err(anyhow!("Row data is not supported"))
     }
 }
@@ -88,19 +87,19 @@ pub struct AccountTokenData {
 #[async_trait]
 impl Query<AccountTokenData> for AccountTokenQry<'_> {
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/account_token_data.sql"))
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.token.as_slice())
     }
-    fn row_data(row: &AnyRow) -> anyhow::Result<AccountTokenData> {
+    fn row_data_mysql(row: &sqlx::mysql::MySqlRow) -> anyhow::Result<AccountTokenData> {
         Ok(AccountTokenData {
             account_id: row
                 .try_get("account_id")
@@ -120,19 +119,19 @@ pub struct InvalidateAccountToken<'a> {
 #[async_trait]
 impl Query<()> for InvalidateAccountToken<'_> {
     async fn prepare_mysql(
-        connection: &mut sqlx::AnyConnection,
-    ) -> anyhow::Result<sqlx::any::AnyStatement<'static>> {
+        connection: &mut sqlx::mysql::MySqlConnection,
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
         Ok(connection
             .prepare(include_str!("mysql/invalidate_account_token.sql"))
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::any::AnyStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Any, sqlx::any::AnyArguments<'b>> {
+        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+    ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.token.as_slice())
     }
-    fn row_data(_row: &AnyRow) -> anyhow::Result<()> {
+    fn row_data_mysql(_row: &sqlx::mysql::MySqlRow) -> anyhow::Result<()> {
         Err(anyhow!("Row data is not supported"))
     }
 }

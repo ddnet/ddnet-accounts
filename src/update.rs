@@ -1,8 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
-use ddnet_account_sql::query::Query;
+use ddnet_account_sql::{any::AnyPool, query::Query};
 use queries::{CleanupAccountTokens, CleanupCerts, CleanupCredentialAuthTokens};
-use sqlx::{Acquire, AnyPool, Executor};
 
 use crate::{email::EmailShared, email_limit, ip_limit, shared::Shared};
 
@@ -10,26 +9,23 @@ pub mod queries;
 
 pub async fn update_impl(pool: &AnyPool, shared: &Arc<Shared>) {
     if let Ok(mut connection) = pool.acquire().await {
-        if let Ok(connection) = connection.acquire().await {
+        if let Ok(mut connection) = connection.acquire().await {
             // cleanup credential auth tokens
-            let _ = connection
-                .execute(CleanupCredentialAuthTokens {}.query(
-                    connection,
-                    &shared.db.cleanup_credential_auth_tokens_statement,
-                ))
+            let _ = CleanupCredentialAuthTokens {}
+                .query(&shared.db.cleanup_credential_auth_tokens_statement)
+                .execute(&mut connection)
                 .await;
 
             // cleanup account tokens
-            let _ = connection
-                .execute(
-                    CleanupAccountTokens {}
-                        .query(connection, &shared.db.cleanup_account_tokens_statement),
-                )
+            let _ = CleanupAccountTokens {}
+                .query(&shared.db.cleanup_account_tokens_statement)
+                .execute(&mut connection)
                 .await;
 
             // cleanup certs
-            let _ = connection
-                .execute(CleanupCerts {}.query(connection, &shared.db.cleanup_certs_statement))
+            let _ = CleanupCerts {}
+                .query(&shared.db.cleanup_certs_statement)
+                .execute(&mut connection)
                 .await;
         }
     }

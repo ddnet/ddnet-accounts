@@ -2,9 +2,8 @@ pub(crate) mod queries;
 
 use std::sync::Arc;
 
-use ddnet_account_sql::{is_duplicate_entry, query::Query};
+use ddnet_account_sql::{any::AnyPool, is_duplicate_entry, query::Query};
 use ddnet_accounts_shared::game_server::user_id::UserId;
-use sqlx::Acquire;
 use thiserror::Error;
 
 use crate::{
@@ -39,7 +38,7 @@ pub enum RenameError {
 /// Returns `false` if the user had no account.
 pub async fn rename(
     shared: Arc<Shared>,
-    pool: &sqlx::AnyPool,
+    pool: &AnyPool,
     user_id: &UserId,
     name: &str,
 ) -> anyhow::Result<bool, RenameError> {
@@ -65,7 +64,7 @@ pub async fn rename(
             .acquire()
             .await
             .map_err(|err| RenameError::Database(err.into()))?;
-        let con = pool_con
+        let mut con = pool_con
             .acquire()
             .await
             .map_err(|err| RenameError::Database(err.into()))?;
@@ -73,8 +72,8 @@ pub async fn rename(
         let qry = RenameUser { account_id, name };
 
         let res = qry
-            .query(con, &shared.db.try_rename_statement)
-            .execute(&mut *con)
+            .query(&shared.db.try_rename_statement)
+            .execute(&mut con)
             .await;
 
         if is_duplicate_entry(&res) {
