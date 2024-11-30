@@ -1,6 +1,6 @@
 [package]
 name = "ddnet-account-client-http-fs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -8,9 +8,9 @@ description = "The base client implementation for accounts, assuming no HTTP cli
 repository = "https://github.com/ddnet/ddnet-accounts"
 
 [dependencies]
-ddnet-accounts-shared = { version = "0.1.0", path = "../ddnet-accounts-shared" }
+ddnet-accounts-shared = { version = "0.2.0", path = "../ddnet-accounts-shared" }
 ddnet-accounts-types = { version = "0.1.0", path = "../ddnet-accounts-types" }
-ddnet-account-client = { version = "0.1.0", path = "../ddnet-account-client" }
+ddnet-account-client = { version = "0.2.0", path = "../ddnet-account-client" }
 
 anyhow = { version = "1.0.93", features = ["backtrace"] }
 parking_lot = "0.12.3"
@@ -19,6 +19,7 @@ url = { version = "2.5.4", features = ["serde"] }
 tokio = { version = "1.41.1", features = ["rt-multi-thread", "sync", "fs", "time", "macros"] }
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
+serde_with = "3.11.0"
 email_address = { version = "0.2.9", features = ["serde"] }
 tempfile = "3.14.0"
 x509-cert = { version = "0.2.5" }

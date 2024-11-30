@@ -27,15 +27,21 @@ use ddnet_accounts_types::account_id::AccountId;
 use either::Either;
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
+use serde_with::{serde_as, DefaultOnError};
 use x509_cert::der::Decode;
 
 pub use x509_cert::Certificate;
 
 use crate::{client::DeleteAccountExt, fs::Fs};
 
+#[serde_as]
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct ProfileData {
     pub name: String,
+
+    #[serde(default)]
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    pub user: HashMap<String, serde_json::Value>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -288,11 +294,12 @@ impl<
         Ok(account_data.account_data)
     }
 
+    /// Returns the profile's name
     async fn login_impl(
         &self,
         display_name: &str,
         credential_auth_token_hex: String,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<String> {
         let path = self.secure_base_path.join("acc_prepare");
         let account_client = Arc::new((self.factory)(path).await?);
 
@@ -322,6 +329,7 @@ impl<
             cur_cert: Default::default(),
             profile_data: ProfileData {
                 name: display_name.to_string(),
+                user: Default::default(),
             },
         };
 
@@ -338,15 +346,17 @@ impl<
 
         self.signed_cert_and_key_pair().await;
 
-        Ok(())
+        Ok(profile_name)
     }
 
-    /// try to login via credential auth token previously created with e.g. [`Self::credential_auth_email_token`]
+    /// Try to login via credential auth token previously created with e.g. [`Self::credential_auth_email_token`]
+    ///
+    /// Returns the profile's name
     pub async fn login_email(
         &self,
         email: email_address::EmailAddress,
         credential_auth_token_hex: String,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<String> {
         self.login_impl(
             &format!("{}'s account", email.local_part()),
             credential_auth_token_hex,
@@ -355,11 +365,13 @@ impl<
     }
 
     /// try to login via credential auth token previously created with e.g. [`Self::login_steam_token`]
+    ///
+    /// Returns the profile's name
     pub async fn login_steam(
         &self,
         steam_user_name: String,
         credential_auth_token_hex: String,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<String> {
         self.login_impl(
             &format!("{}'s account", steam_user_name),
             credential_auth_token_hex,
@@ -788,6 +800,15 @@ impl<
         (profiles.profiles, profiles.cur_profile)
     }
 
+    /// Get the currently active profile's profile data or `None`.
+    pub fn current_profile(&self) -> Option<ProfileData> {
+        let profiles = self.profiles.lock();
+        profiles
+            .profiles
+            .get(&profiles.cur_profile)
+            .map(|p| p.profile_data.clone())
+    }
+
     /// Set the current profile to a new one.
     /// Silently fails, if the new profile does not exist.
     pub async fn set_profile(&self, profile_name: &str) {
@@ -812,6 +833,25 @@ impl<
             let mut profiles = self.profiles.lock();
             if let Some(profile) = profiles.profiles.get_mut(profile_name) {
                 profile.profile_data.name = display_name;
+            }
+            profiles_state = Self::to_profile_states(&profiles);
+            drop(profiles);
+        }
+
+        let _ = profiles_state.save(&self.fs).await;
+    }
+
+    /// Sets arbitrary data specified by the implementation, saved inside the profiles struct
+    pub async fn set_profile_user_data(
+        &self,
+        profile_name: &str,
+        user: HashMap<String, serde_json::Value>,
+    ) {
+        let profiles_state;
+        {
+            let mut profiles = self.profiles.lock();
+            if let Some(profile) = profiles.profiles.get_mut(profile_name) {
+                profile.profile_data.user = user;
             }
             profiles_state = Self::to_profile_states(&profiles);
             drop(profiles);
