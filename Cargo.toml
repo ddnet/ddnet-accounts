@@ -11,7 +11,7 @@ members = [
 
 [package]
 name = "ddnet-accounts"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -64,8 +64,8 @@ notify = { version = "7.0.0", default-features = false, features = ["macos_kqueu
 [dev-dependencies]
 ddnet-account-client = { version = "0.2.0", path = "lib/ddnet-account-client" }
 ddnet-account-game-server = { version = "0.3.0", path = "lib/ddnet-account-game-server" }
-ddnet-account-client-http-fs = { version = "0.2.0", path = "lib/ddnet-account-client-http-fs" }
-ddnet-account-client-reqwest = { version = "0.2.0", path = "lib/ddnet-account-client-reqwest" }
+ddnet-account-client-http-fs = { version = "0.3.0", path = "lib/ddnet-account-client-http-fs" }
+ddnet-account-client-reqwest = { version = "0.3.0", path = "lib/ddnet-account-client-reqwest" }
 
 regex = "1.11.1"
 tempfile = "3.14.0"

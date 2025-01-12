@@ -618,7 +618,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-account-client-http-fs"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -640,7 +640,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-account-client-reqwest"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -676,7 +676,7 @@ dependencies = [
 
 [[package]]
 name = "ddnet-accounts"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "argon2",

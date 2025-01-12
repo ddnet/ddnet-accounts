@@ -49,8 +49,26 @@ async fn signing_certs() {
             ddnet_account_client::certs::download_certs(client.client.as_ref()).await?;
         assert!(downloaded_certs.contains(&cert));
 
+        // the sleep time is around one week, since no request was made before (the file didn't exist).
+        assert!(cert_downloader.sleep_time() > Duration::from_secs(60 * 60 * 24));
+        let last_request = cert_downloader.last_request();
+
         // now force download the newest certs
-        cert_downloader.download_certs().await;
+        cert_downloader.download_certs().await?;
+
+        // the sleep time is around one week, since a request was just made.
+        assert!(cert_downloader.sleep_time() > Duration::from_secs(60 * 60 * 24));
+        // also make sure the request is reset properly.
+        assert!(cert_downloader.last_request() >= last_request);
+
+        // this what the sleep time in the cert downloader would do
+        let invalid_in = cert_downloader.invalid_in(now, Duration::from_secs(7 * 24 * 60 * 60));
+        let one_week = Duration::from_secs(7 * 24 * 60 * 60);
+        let duration_offset = invalid_in.unwrap_or(one_week).min(one_week);
+        // since our cert is only valid for 5 seconds, it must have been invalid in one week.
+        assert!(duration_offset == Duration::ZERO);
+        // but the sleep time is still bigger due to the last request
+        assert!(cert_downloader.sleep_time() > Duration::from_secs(60 * 60 * 24));
 
         // now the cert should be invalid in the previously specified time (now)
         let invalid_in = cert_downloader.invalid_in(now, Duration::from_secs(0));
