@@ -1,8 +1,9 @@
 use anyhow::anyhow;
-use axum::async_trait;
+use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_types::account_id::AccountId;
 use sqlx::Executor;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 pub struct RemoveAccount<'a> {
@@ -13,14 +14,14 @@ pub struct RemoveAccount<'a> {
 impl Query<()> for RemoveAccount<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/rem_account.sql"))
+            .prepare(include_str!("mysql/rem_account.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.account_id)
     }

@@ -40,13 +40,13 @@ use account_token::{
     },
 };
 use anyhow::anyhow;
-use axum::{extract::DefaultBodyLimit, response::IntoResponse, Json, Router};
+use axum::{Json, Router, extract::DefaultBodyLimit, response::IntoResponse};
 use certs::{
-    certs_request, generate_key_and_cert, get_certs,
+    PrivateKeys, certs_request, generate_key_and_cert, get_certs,
     queries::{AddCert, GetCerts},
-    store_cert, PrivateKeys,
+    store_cert,
 };
-use clap::{command, parser::ValueSource, Arg, ArgAction};
+use clap::{Arg, ArgAction, command, parser::ValueSource};
 use credential_auth_token::{
     credential_auth_token_email, credential_auth_token_steam, queries::AddCredentialAuthToken,
 };
@@ -58,7 +58,7 @@ use ddnet_accounts_shared::account_server::{
 use delete::{delete_request, queries::RemoveAccount};
 use either::Either;
 use email::EmailShared;
-use ip_limit::{ip_deny_layer, IpDenyList};
+use ip_limit::{IpDenyList, ip_deny_layer};
 use link_credential::{
     link_credential_request,
     queries::{UnlinkCredentialEmail, UnlinkCredentialSteam},
@@ -86,11 +86,11 @@ use std::{
     sync::Arc,
     time::{Duration, SystemTime},
 };
-use steam::{SteamShared, OFFICIAL_STEAM_AUTH_URL};
+use steam::{OFFICIAL_STEAM_AUTH_URL, SteamShared};
 use tokio::net::{TcpListener, TcpSocket};
 use tower::ServiceBuilder;
 use tower_governor::{
-    governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor, GovernorLayer,
+    GovernorLayer, governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor,
 };
 use unlink_credential::{
     queries::{UnlinkCredentialByEmail, UnlinkCredentialBySteam},
@@ -443,32 +443,31 @@ pub(crate) async fn prepare_http(
 
     // build http server
     let layer = |limiter: &LimiterValues| {
+        let governor_config = GovernorConfigBuilder::default()
+            .key_extractor(SmartIpKeyExtractor)
+            .period(limiter.time_until_another_attempt)
+            .burst_size(limiter.initial_request_count.get())
+            .finish()
+            .ok_or_else(|| anyhow!("Could not create governor config."))?;
+
         anyhow::Ok(
-            ServiceBuilder::new().layer(GovernorLayer {
-                config: Arc::new(
-                    GovernorConfigBuilder::default()
-                        .key_extractor(SmartIpKeyExtractor)
-                        .period(limiter.time_until_another_attempt)
-                        .burst_size(limiter.initial_request_count.get())
-                        .error_handler(|err| match err {
-                            tower_governor::GovernorError::TooManyRequests { .. } => {
-                                Json(AccountServerReqResult::<(), ()>::Err(
-                                    AccountServerRequestError::RateLimited(err.to_string()),
-                                ))
-                                .into_response()
-                            }
-                            tower_governor::GovernorError::UnableToExtractKey
-                            | tower_governor::GovernorError::Other { .. } => {
-                                Json(AccountServerReqResult::<(), ()>::Err(
-                                    AccountServerRequestError::Other(err.to_string()),
-                                ))
-                                .into_response()
-                            }
-                        })
-                        .finish()
-                        .ok_or_else(|| anyhow!("Could not create governor config."))?,
-                ),
-            }),
+            ServiceBuilder::new().layer(GovernorLayer::new(governor_config).error_handler(|err| {
+                match err {
+                    tower_governor::GovernorError::TooManyRequests { .. } => {
+                        Json(AccountServerReqResult::<(), ()>::Err(
+                            AccountServerRequestError::RateLimited(err.to_string()),
+                        ))
+                        .into_response()
+                    }
+                    tower_governor::GovernorError::UnableToExtractKey
+                    | tower_governor::GovernorError::Other { .. } => {
+                        Json(AccountServerReqResult::<(), ()>::Err(
+                            AccountServerRequestError::Other(err.to_string()),
+                        ))
+                        .into_response()
+                    }
+                }
+            })),
         )
     };
 

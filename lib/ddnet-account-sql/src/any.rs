@@ -3,13 +3,13 @@ use sqlx::Acquire;
 
 #[derive(Debug)]
 /// Enum variant over a database statement
-pub enum AnyStatement<'a> {
+pub enum AnyStatement {
     #[cfg(feature = "mysql")]
     /// Mysql statement
-    MySql(sqlx::mysql::MySqlStatement<'a>),
+    MySql(sqlx::mysql::MySqlStatement),
     /// Sqlite statement
     #[cfg(feature = "sqlite")]
-    Sqlite(sqlx::sqlite::SqliteStatement<'a>),
+    Sqlite(sqlx::sqlite::SqliteStatement),
 }
 
 /// Enum variant over a database row result
@@ -52,7 +52,7 @@ pub enum AnyQuery<'a> {
     MySql(sqlx::query::Query<'a, sqlx::MySql, sqlx::mysql::MySqlArguments>),
     /// Sqlite query
     #[cfg(feature = "sqlite")]
-    Sqlite(sqlx::query::Query<'a, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'a>>),
+    Sqlite(sqlx::query::Query<'a, sqlx::Sqlite, sqlx::sqlite::SqliteArguments>),
 }
 
 impl AnyQuery<'_> {

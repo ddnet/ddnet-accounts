@@ -32,7 +32,9 @@ jobs:
         sudo touch /etc/aliases
         sudo bash -c 'echo "test: root" >> /etc/aliases'
         sudo bash -c 'echo "test2: root" >> /etc/aliases'
+        sudo bash -c 'printf "\ntest: root\ntest2: root\n" >> /etc/postfix/aliases'
         sudo postalias /etc/aliases
+        sudo postalias /etc/postfix/aliases
         sudo apt-get install libmariadb-dev mariadb-server -y
         sudo mysql <<EOF
         CREATE USER 'ddnet-account-test'@localhost IDENTIFIED BY 'test';

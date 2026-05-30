@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use anyhow::anyhow;
-use axum::async_trait;
+use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::credential_auth_token::CredentialAuthTokenOperation;
 use ddnet_accounts_shared::client::login::CredentialAuthToken;
@@ -9,6 +9,7 @@ use ddnet_accounts_shared::client::machine_id::MachineUid;
 use ddnet_accounts_types::account_id::AccountId;
 use sqlx::Executor;
 use sqlx::Row;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 use crate::types::TokenType;
@@ -27,14 +28,14 @@ pub struct CredentialAuthTokenData {
 impl Query<CredentialAuthTokenData> for CredentialAuthTokenQry<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/credential_auth_token_data.sql"))
+            .prepare(include_str!("mysql/credential_auth_token_data.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.token.as_slice())
     }
@@ -63,14 +64,14 @@ pub struct InvalidateCredentialAuthToken<'a> {
 impl Query<()> for InvalidateCredentialAuthToken<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/invalidate_credential_auth_token.sql"))
+            .prepare(include_str!("mysql/invalidate_credential_auth_token.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.token.as_slice())
     }
@@ -85,14 +86,14 @@ pub struct TryCreateAccount {}
 impl Query<()> for TryCreateAccount {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/add_account.sql"))
+            .prepare(include_str!("mysql/add_account.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query()
     }
@@ -110,14 +111,14 @@ pub struct LinkAccountCredentialEmail<'a> {
 impl Query<()> for LinkAccountCredentialEmail<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/link_credential_email.sql"))
+            .prepare(include_str!("mysql/link_credential_email.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement
             .query()
@@ -138,14 +139,14 @@ pub struct LinkAccountCredentialSteam<'a> {
 impl Query<()> for LinkAccountCredentialSteam<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/link_credential_steam.sql"))
+            .prepare(include_str!("mysql/link_credential_steam.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.account_id).bind(self.steamid64)
     }
@@ -164,14 +165,14 @@ pub struct AccountIdFromLastInsert {}
 impl Query<AccountData> for AccountIdFromLastInsert {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/account_id_from_last_insert.sql"))
+            .prepare(include_str!("mysql/account_id_from_last_insert.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query()
     }
@@ -192,14 +193,14 @@ pub struct AccountIdFromEmail<'a> {
 impl Query<AccountData> for AccountIdFromEmail<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/account_id_from_email.sql"))
+            .prepare(include_str!("mysql/account_id_from_email.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.email.as_str())
     }
@@ -220,14 +221,14 @@ pub struct AccountIdFromSteam<'a> {
 impl Query<AccountData> for AccountIdFromSteam<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/account_id_from_steam.sql"))
+            .prepare(include_str!("mysql/account_id_from_steam.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.steamid64)
     }
@@ -250,14 +251,14 @@ pub struct CreateSession<'a> {
 impl Query<()> for CreateSession<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/add_session.sql"))
+            .prepare(include_str!("mysql/add_session.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement
             .query()

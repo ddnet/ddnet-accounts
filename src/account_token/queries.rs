@@ -7,6 +7,7 @@ use ddnet_accounts_shared::client::account_token::AccountToken;
 use ddnet_accounts_types::account_id::AccountId;
 use sqlx::Executor;
 use sqlx::Row;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 use crate::types::AccountTokenType;
@@ -22,14 +23,14 @@ pub struct AddAccountTokenEmail<'a> {
 impl Query<()> for AddAccountTokenEmail<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/add_account_token_email.sql"))
+            .prepare(include_str!("mysql/add_account_token_email.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         let ty: &'static str = self.ty.into();
         statement
@@ -54,14 +55,14 @@ pub struct AddAccountTokenSteam<'a> {
 impl Query<()> for AddAccountTokenSteam<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/add_account_token_steam.sql"))
+            .prepare(include_str!("mysql/add_account_token_steam.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         let ty: &'static str = self.ty.into();
         statement
@@ -88,14 +89,14 @@ pub struct AccountTokenData {
 impl Query<AccountTokenData> for AccountTokenQry<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/account_token_data.sql"))
+            .prepare(include_str!("mysql/account_token_data.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.token.as_slice())
     }
@@ -120,14 +121,14 @@ pub struct InvalidateAccountToken<'a> {
 impl Query<()> for InvalidateAccountToken<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/invalidate_account_token.sql"))
+            .prepare(include_str!("mysql/invalidate_account_token.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.token.as_slice())
     }

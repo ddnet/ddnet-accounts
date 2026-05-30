@@ -3,6 +3,7 @@ use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::credential_auth_token::CredentialAuthTokenOperation;
 use ddnet_accounts_shared::client::login::CredentialAuthToken;
 use sqlx::Executor;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 use crate::types::TokenType;
@@ -19,14 +20,14 @@ pub struct AddCredentialAuthToken<'a> {
 impl Query<()> for AddCredentialAuthToken<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/add_credential_auth_token.sql"))
+            .prepare(include_str!("mysql/add_credential_auth_token.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         let ty: &'static str = self.ty.into();
         let op: &'static str = self.op.into();

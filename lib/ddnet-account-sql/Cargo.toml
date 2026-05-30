@@ -1,6 +1,6 @@
 [package]
 name = "ddnet-account-sql"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
 authors = ["Jupeyy"]
 license = "MIT OR Apache-2.0"
@@ -8,7 +8,7 @@ description = "Helpers for SQL databases."
 repository = "https://github.com/ddnet/ddnet-accounts"
 
 [dependencies]
-sqlx = { version = "0.8", features = ["any", "runtime-tokio-rustls", "chrono"] }
+sqlx = { version = "0.9", features = ["any", "runtime-tokio", "tls-rustls", "chrono"] }
 async-trait = "0.1"
 anyhow = { version = "1", features = ["backtrace"] }
 futures = "0.3"
