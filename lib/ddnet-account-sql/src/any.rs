@@ -253,7 +253,7 @@ impl AnyPoolConnection {
     /// Retrieves the inner connection of this pool connection.
     ///
     /// See [sqlx::Acquire::acquire].
-    pub async fn acquire(&mut self) -> Result<AnyConnection, sqlx::Error> {
+    pub async fn acquire(&mut self) -> Result<AnyConnection<'_>, sqlx::Error> {
         Ok(match self {
             #[cfg(feature = "mysql")]
             Self::MySql(con) => AnyConnection::MySql(con.acquire().await?),

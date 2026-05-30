@@ -8,7 +8,7 @@ pub type Otp = [u8; 16];
 
 /// Generates a new random one time password
 pub fn generate_otp() -> Otp {
-    rand::rngs::OsRng.gen::<Otp>()
+    rand::rngs::OsRng.r#gen::<Otp>()
 }
 
 /// The response to a client otp request
