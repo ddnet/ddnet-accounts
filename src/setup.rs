@@ -3,27 +3,34 @@ use ddnet_account_sql::any::AnyPool;
 use ddnet_account_sql::version::get_version;
 use ddnet_account_sql::version::set_version;
 use sqlx::Executor;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 const VERSION_NAME: &str = "account-server";
 
 async fn setup_version1_mysql(con: &mut sqlx::mysql::MySqlConnection) -> anyhow::Result<()> {
     // first create all statements (syntax check)
-    let account = con.prepare(include_str!("setup/mysql/account.sql")).await?;
+    let account = con
+        .prepare(include_str!("setup/mysql/account.sql").into_sql_str())
+        .await?;
     let credential_email = con
-        .prepare(include_str!("setup/mysql/credential_email.sql"))
+        .prepare(include_str!("setup/mysql/credential_email.sql").into_sql_str())
         .await?;
     let credential_steam = con
-        .prepare(include_str!("setup/mysql/credential_steam.sql"))
+        .prepare(include_str!("setup/mysql/credential_steam.sql").into_sql_str())
         .await?;
     let credential_auth_tokens = con
-        .prepare(include_str!("setup/mysql/credential_auth_tokens.sql"))
+        .prepare(include_str!("setup/mysql/credential_auth_tokens.sql").into_sql_str())
         .await?;
     let account_tokens = con
-        .prepare(include_str!("setup/mysql/account_tokens.sql"))
+        .prepare(include_str!("setup/mysql/account_tokens.sql").into_sql_str())
         .await?;
-    let session = con.prepare(include_str!("setup/mysql/session.sql")).await?;
-    let certs = con.prepare(include_str!("setup/mysql/certs.sql")).await?;
+    let session = con
+        .prepare(include_str!("setup/mysql/session.sql").into_sql_str())
+        .await?;
+    let certs = con
+        .prepare(include_str!("setup/mysql/certs.sql").into_sql_str())
+        .await?;
 
     // afterwards actually create tables
     account.query().execute(&mut *con).await?;
@@ -68,27 +75,25 @@ async fn delete_mysql(con: &mut sqlx::mysql::MySqlConnection) -> anyhow::Result<
     // first create all statements (syntax check)
     // delete in reverse order to creating
     let session = con
-        .prepare(include_str!("setup/mysql/delete/session.sql"))
+        .prepare(include_str!("setup/mysql/delete/session.sql").into_sql_str())
         .await?;
     let credential_auth_tokens = con
-        .prepare(include_str!(
-            "setup/mysql/delete/credential_auth_tokens.sql"
-        ))
+        .prepare(include_str!("setup/mysql/delete/credential_auth_tokens.sql").into_sql_str())
         .await?;
     let account_tokens = con
-        .prepare(include_str!("setup/mysql/delete/account_tokens.sql"))
+        .prepare(include_str!("setup/mysql/delete/account_tokens.sql").into_sql_str())
         .await?;
     let credential_steam = con
-        .prepare(include_str!("setup/mysql/delete/credential_steam.sql"))
+        .prepare(include_str!("setup/mysql/delete/credential_steam.sql").into_sql_str())
         .await?;
     let credential_email = con
-        .prepare(include_str!("setup/mysql/delete/credential_email.sql"))
+        .prepare(include_str!("setup/mysql/delete/credential_email.sql").into_sql_str())
         .await?;
     let account = con
-        .prepare(include_str!("setup/mysql/delete/account.sql"))
+        .prepare(include_str!("setup/mysql/delete/account.sql").into_sql_str())
         .await?;
     let certs = con
-        .prepare(include_str!("setup/mysql/delete/certs.sql"))
+        .prepare(include_str!("setup/mysql/delete/certs.sql").into_sql_str())
         .await?;
 
     // afterwards actually drop tables

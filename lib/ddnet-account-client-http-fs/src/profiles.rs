@@ -18,7 +18,7 @@ use ddnet_accounts_shared::{
     account_server::account_info::AccountInfoResponse,
     cert::generate_self_signed,
     client::{
-        account_data::{key_pair, AccountDataForClient},
+        account_data::{AccountDataForClient, key_pair},
         account_token::AccountTokenOperation,
         credential_auth_token::CredentialAuthTokenOperation,
     },
@@ -27,7 +27,7 @@ use ddnet_accounts_types::account_id::AccountId;
 use either::Either;
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DefaultOnError};
+use serde_with::{DefaultOnError, serde_as};
 use x509_cert::der::Decode;
 
 pub use x509_cert::Certificate;
@@ -131,16 +131,16 @@ pub struct Profiles<
 }
 
 impl<
-        C: Io + DeleteAccountExt + Debug + 'static,
-        F: Deref<
-                Target = dyn Fn(
-                    PathBuf,
-                )
-                    -> Pin<Box<dyn Future<Output = anyhow::Result<C>> + Sync + Send>>,
-            > + Debug
-            + Sync
-            + Send,
-    > Profiles<C, F>
+    C: Io + DeleteAccountExt + Debug + 'static,
+    F: Deref<
+            Target = dyn Fn(
+                PathBuf,
+            )
+                -> Pin<Box<dyn Future<Output = anyhow::Result<C>> + Sync + Send>>,
+        > + Debug
+        + Sync
+        + Send,
+> Profiles<C, F>
 {
     fn to_profile_states(profiles: &ActiveProfiles<C>) -> ProfilesState {
         let mut res = ProfilesState::default();
@@ -280,7 +280,7 @@ impl<
                         accountless_validy_range().as_secs() as i64,
                         accountless_validy_range().subsec_nanos(),
                     )
-                    .unwrap_or(chrono::TimeDelta::max_value()))
+                    .unwrap_or(chrono::TimeDelta::MAX))
                 .then_some(accountless_keys_and_validy)
                 .ok_or_else(|| anyhow!("accountless keys too old"))
             })
@@ -880,16 +880,16 @@ pub struct ProfilesLoading<
 }
 
 impl<
-        C: Io + DeleteAccountExt + Debug,
-        F: Deref<
-                Target = dyn Fn(
-                    PathBuf,
-                )
-                    -> Pin<Box<dyn Future<Output = anyhow::Result<C>> + Sync + Send>>,
-            > + Debug
-            + Sync
-            + Send,
-    > ProfilesLoading<C, F>
+    C: Io + DeleteAccountExt + Debug,
+    F: Deref<
+            Target = dyn Fn(
+                PathBuf,
+            )
+                -> Pin<Box<dyn Future<Output = anyhow::Result<C>> + Sync + Send>>,
+        > + Debug
+        + Sync
+        + Send,
+> ProfilesLoading<C, F>
 {
     pub async fn new(secure_base_path: PathBuf, factory: Arc<F>) -> anyhow::Result<Self> {
         let fs = Fs::new(secure_base_path.clone()).await?;

@@ -9,6 +9,7 @@ mod mysql {
     use ddnet_account_sql::any::AnyConnection;
     use ddnet_account_sql::version::set_version;
     use sqlx::Executor;
+    use sqlx::SqlSafeStr;
     use sqlx::Statement;
 
     use super::VERSION_NAME;
@@ -17,7 +18,9 @@ mod mysql {
         con: &mut sqlx::mysql::MySqlConnection,
     ) -> anyhow::Result<()> {
         // first create all statements (syntax check)
-        let user = con.prepare(include_str!("setup/mysql/user.sql")).await?;
+        let user = con
+            .prepare(include_str!("setup/mysql/user.sql").into_sql_str())
+            .await?;
 
         // afterwards actually create tables
         user.query().execute(&mut *con).await?;
@@ -31,7 +34,7 @@ mod mysql {
         // first create all statements (syntax check)
         // delete in reverse order to creating
         let user = con
-            .prepare(include_str!("setup/mysql/delete/user.sql"))
+            .prepare(include_str!("setup/mysql/delete/user.sql").into_sql_str())
             .await?;
 
         // afterwards actually drop tables
@@ -51,6 +54,7 @@ mod sqlite {
     use ddnet_account_sql::any::AnyConnection;
     use ddnet_account_sql::version::set_version;
     use sqlx::Executor;
+    use sqlx::SqlSafeStr;
     use sqlx::Statement;
 
     use super::VERSION_NAME;
@@ -59,7 +63,9 @@ mod sqlite {
         con: &mut sqlx::sqlite::SqliteConnection,
     ) -> anyhow::Result<()> {
         // first create all statements (syntax check)
-        let user = con.prepare(include_str!("setup/sqlite/user.sql")).await?;
+        let user = con
+            .prepare(include_str!("setup/sqlite/user.sql").into_sql_str())
+            .await?;
 
         // afterwards actually create tables
         user.query().execute(&mut *con).await?;
@@ -73,7 +79,7 @@ mod sqlite {
         // first create all statements (syntax check)
         // delete in reverse order to creating
         let user = con
-            .prepare(include_str!("setup/sqlite/delete/user.sql"))
+            .prepare(include_str!("setup/sqlite/delete/user.sql").into_sql_str())
             .await?;
 
         // afterwards actually drop tables

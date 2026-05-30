@@ -1,10 +1,11 @@
 use anyhow::anyhow;
-use axum::async_trait;
+use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::machine_id::MachineUid;
 use ddnet_accounts_types::account_id::AccountId;
 use sqlx::Executor;
 use sqlx::Row;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 pub struct AccountInfo<'a> {
@@ -23,14 +24,14 @@ pub struct AccountInfoData {
 impl Query<AccountInfoData> for AccountInfo<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/account_info.sql"))
+            .prepare(include_str!("mysql/account_info.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement
             .query()

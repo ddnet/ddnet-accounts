@@ -1,7 +1,8 @@
 use anyhow::anyhow;
-use axum::async_trait;
+use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use sqlx::Executor;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 pub struct CleanupCredentialAuthTokens {}
@@ -10,14 +11,14 @@ pub struct CleanupCredentialAuthTokens {}
 impl Query<()> for CleanupCredentialAuthTokens {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/cleanup_credential_auth_tokens.sql"))
+            .prepare(include_str!("mysql/cleanup_credential_auth_tokens.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query()
     }
@@ -32,14 +33,14 @@ pub struct CleanupAccountTokens {}
 impl Query<()> for CleanupAccountTokens {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/cleanup_account_tokens.sql"))
+            .prepare(include_str!("mysql/cleanup_account_tokens.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query()
     }
@@ -54,14 +55,14 @@ pub struct CleanupCerts {}
 impl Query<()> for CleanupCerts {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/cleanup_certs.sql"))
+            .prepare(include_str!("mysql/cleanup_certs.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query()
     }

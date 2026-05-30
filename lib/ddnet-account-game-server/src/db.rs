@@ -4,8 +4,8 @@ use ddnet_account_sql::any::AnyStatement;
 pub struct DbConnectionShared {
     /// Prepared statement for
     /// [`crate::auto_login::queries::RegisterUser`]
-    pub register_user_statement: AnyStatement<'static>,
+    pub register_user_statement: AnyStatement,
     /// Prepared statement for
     /// [`crate::rename::queries::RenameUser`]
-    pub try_rename_statement: AnyStatement<'static>,
+    pub try_rename_statement: AnyStatement,
 }

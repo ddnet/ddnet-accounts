@@ -20,23 +20,27 @@ impl Query<()> for RegisterUser<'_> {
     #[cfg(feature = "mysql")]
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
+        use sqlx::SqlSafeStr;
+
         Ok(connection
-            .prepare(include_str!("mysql/try_insert_user.sql"))
+            .prepare(include_str!("mysql/try_insert_user.sql").into_sql_str())
             .await?)
     }
     #[cfg(feature = "sqlite")]
     async fn prepare_sqlite(
         connection: &mut sqlx::sqlite::SqliteConnection,
-    ) -> anyhow::Result<sqlx::sqlite::SqliteStatement<'static>> {
+    ) -> anyhow::Result<sqlx::sqlite::SqliteStatement> {
+        use sqlx::SqlSafeStr;
+
         Ok(connection
-            .prepare(include_str!("sqlite/try_insert_user.sql"))
+            .prepare(include_str!("sqlite/try_insert_user.sql").into_sql_str())
             .await?)
     }
     #[cfg(feature = "mysql")]
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         let account_id = self.account_id;
 
@@ -45,8 +49,8 @@ impl Query<()> for RegisterUser<'_> {
     #[cfg(feature = "sqlite")]
     fn query_sqlite<'b>(
         &'b self,
-        statement: &'b sqlx::sqlite::SqliteStatement<'static>,
-    ) -> sqlx::query::Query<'b, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'b>> {
+        statement: &'b sqlx::sqlite::SqliteStatement,
+    ) -> sqlx::query::Query<'b, sqlx::Sqlite, sqlx::sqlite::SqliteArguments> {
         let account_id = self.account_id;
 
         statement.query().bind(self.default_name).bind(account_id)

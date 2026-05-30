@@ -17,6 +17,8 @@ You might have to make sure you can send mails to test@localhost & test2@localho
 sudo touch /etc/aliases
 sudo bash -c 'echo "test: root" >> /etc/aliases'
 sudo bash -c 'echo "test2: root" >> /etc/aliases'
+sudo bash -c 'printf "\ntest: root\ntest2: root\n" >> /etc/postfix/aliases'
+sudo postalias /etc/postfix/aliases
 sudo postalias /etc/aliases
 ```
 

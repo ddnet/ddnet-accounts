@@ -9,16 +9,16 @@ pub trait Query<A> {
     #[cfg(feature = "mysql")]
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>>;
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement>;
 
     /// Sqlite version of [`Query::prepare`].
     #[cfg(feature = "sqlite")]
     async fn prepare_sqlite(
         connection: &mut sqlx::sqlite::SqliteConnection,
-    ) -> anyhow::Result<sqlx::sqlite::SqliteStatement<'static>>;
+    ) -> anyhow::Result<sqlx::sqlite::SqliteStatement>;
 
     /// Prepare a statement to be later used by [`Query::query`].
-    async fn prepare(connection: &mut AnyConnection) -> anyhow::Result<AnyStatement<'static>> {
+    async fn prepare(connection: &mut AnyConnection) -> anyhow::Result<AnyStatement> {
         Ok(match connection {
             #[cfg(feature = "mysql")]
             AnyConnection::MySql(connection) => {
@@ -35,18 +35,18 @@ pub trait Query<A> {
     #[cfg(feature = "mysql")]
     fn query_mysql<'a>(
         &'a self,
-        statement: &'a sqlx::mysql::MySqlStatement<'static>,
+        statement: &'a sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'a, sqlx::MySql, sqlx::mysql::MySqlArguments>;
 
     /// Sqlite version of [`Query::query`].
     #[cfg(feature = "sqlite")]
     fn query_sqlite<'a>(
         &'a self,
-        statement: &'a sqlx::sqlite::SqliteStatement<'static>,
-    ) -> sqlx::query::Query<'a, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'a>>;
+        statement: &'a sqlx::sqlite::SqliteStatement,
+    ) -> sqlx::query::Query<'a, sqlx::Sqlite, sqlx::sqlite::SqliteArguments>;
 
     /// Get a query with all arguments bound already, ready to be fetched.
-    fn query<'a>(&'a self, statement: &'a AnyStatement<'static>) -> AnyQuery<'a> {
+    fn query<'a>(&'a self, statement: &'a AnyStatement) -> AnyQuery<'a> {
         match statement {
             #[cfg(feature = "mysql")]
             AnyStatement::MySql(statement) => AnyQuery::MySql(self.query_mysql(statement)),

@@ -4,12 +4,13 @@ use crate::any::{AnyConnection, AnyPool};
 mod mysql {
     use sqlx::Executor;
     use sqlx::Row;
+    use sqlx::SqlSafeStr;
     use sqlx::Statement;
 
     pub(super) async fn try_setup(con: &mut sqlx::mysql::MySqlConnection) -> anyhow::Result<()> {
         // first create all statements (syntax check)
         let version = con
-            .prepare(include_str!("version/mysql/version.sql"))
+            .prepare(include_str!("version/mysql/version.sql").into_sql_str())
             .await?;
 
         // afterwards actually create tables
@@ -24,10 +25,10 @@ mod mysql {
     ) -> anyhow::Result<i64> {
         // first create all statements (syntax check)
         let get_version = con
-            .prepare(include_str!("version/mysql/get_version.sql"))
+            .prepare(include_str!("version/mysql/get_version.sql").into_sql_str())
             .await?;
         let set_version = con
-            .prepare(include_str!("version/mysql/set_version.sql"))
+            .prepare(include_str!("version/mysql/set_version.sql").into_sql_str())
             .await?;
 
         let name = name.to_string();
@@ -60,7 +61,7 @@ mod mysql {
     ) -> anyhow::Result<()> {
         // first create all statements (syntax check)
         let set_version = con
-            .prepare(include_str!("version/mysql/set_version.sql"))
+            .prepare(include_str!("version/mysql/set_version.sql").into_sql_str())
             .await?;
 
         Ok(set_version
@@ -77,7 +78,7 @@ mod mysql {
         // first create all statements (syntax check)
         // delete in reverse order to creating
         let version = con
-            .prepare(include_str!("version/mysql/delete/version.sql"))
+            .prepare(include_str!("version/mysql/delete/version.sql").into_sql_str())
             .await?;
 
         // afterwards actually drop tables
@@ -94,12 +95,13 @@ mod mysql {
 mod sqlite {
     use sqlx::Executor;
     use sqlx::Row;
+    use sqlx::SqlSafeStr;
     use sqlx::Statement;
 
     pub(super) async fn try_setup(con: &mut sqlx::sqlite::SqliteConnection) -> anyhow::Result<()> {
         // first create all statements (syntax check)
         let version = con
-            .prepare(include_str!("version/sqlite/version.sql"))
+            .prepare(include_str!("version/sqlite/version.sql").into_sql_str())
             .await?;
 
         // afterwards actually create tables
@@ -114,10 +116,10 @@ mod sqlite {
     ) -> anyhow::Result<i64> {
         // first create all statements (syntax check)
         let get_version = con
-            .prepare(include_str!("version/sqlite/get_version.sql"))
+            .prepare(include_str!("version/sqlite/get_version.sql").into_sql_str())
             .await?;
         let set_version = con
-            .prepare(include_str!("version/sqlite/set_version.sql"))
+            .prepare(include_str!("version/sqlite/set_version.sql").into_sql_str())
             .await?;
 
         let name = name.to_string();
@@ -150,7 +152,7 @@ mod sqlite {
     ) -> anyhow::Result<()> {
         // first create all statements (syntax check)
         let set_version = con
-            .prepare(include_str!("version/sqlite/set_version.sql"))
+            .prepare(include_str!("version/sqlite/set_version.sql").into_sql_str())
             .await?;
 
         Ok(set_version
@@ -167,7 +169,7 @@ mod sqlite {
         // first create all statements (syntax check)
         // delete in reverse order to creating
         let version = con
-            .prepare(include_str!("version/sqlite/delete/version.sql"))
+            .prepare(include_str!("version/sqlite/delete/version.sql").into_sql_str())
             .await?;
 
         // afterwards actually drop tables

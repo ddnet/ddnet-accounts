@@ -1,8 +1,9 @@
 use anyhow::anyhow;
-use axum::async_trait;
+use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use sqlx::Executor;
 use sqlx::Row;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 pub struct AddCert<'a> {
@@ -14,14 +15,14 @@ pub struct AddCert<'a> {
 impl Query<()> for AddCert<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/add_cert.sql"))
+            .prepare(include_str!("mysql/add_cert.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query().bind(self.cert_der).bind(self.valid_until)
     }
@@ -40,14 +41,14 @@ pub struct SingleCertData {
 impl Query<SingleCertData> for GetCerts {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/get_certs.sql"))
+            .prepare(include_str!("mysql/get_certs.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement.query()
     }

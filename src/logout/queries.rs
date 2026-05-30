@@ -1,8 +1,9 @@
 use anyhow::anyhow;
-use axum::async_trait;
+use async_trait::async_trait;
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::machine_id::MachineUid;
 use sqlx::Executor;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
 
 pub struct RemoveSession<'a> {
@@ -14,14 +15,14 @@ pub struct RemoveSession<'a> {
 impl Query<()> for RemoveSession<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
         Ok(connection
-            .prepare(include_str!("mysql/rem_session.sql"))
+            .prepare(include_str!("mysql/rem_session.sql").into_sql_str())
             .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement
             .query()

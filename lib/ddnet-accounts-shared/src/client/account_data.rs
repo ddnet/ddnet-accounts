@@ -1,7 +1,7 @@
 use ed25519_dalek::{SigningKey, VerifyingKey};
 use serde::{Deserialize, Serialize};
 
-use super::machine_id::{machine_uid, MachineUid};
+use super::machine_id::{MachineUid, machine_uid};
 
 /// This is the account data that should be sent to the server.
 #[derive(Debug, Clone, Serialize, Deserialize)]

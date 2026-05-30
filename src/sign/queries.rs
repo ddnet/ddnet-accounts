@@ -1,11 +1,12 @@
 use ddnet_account_sql::query::Query;
 use ddnet_accounts_shared::client::sign::SignRequest;
 use ddnet_accounts_types::account_id::AccountId;
-use sqlx::types::chrono::DateTime;
-use sqlx::types::chrono::Utc;
 use sqlx::Executor;
 use sqlx::Row;
+use sqlx::SqlSafeStr;
 use sqlx::Statement;
+use sqlx::types::chrono::DateTime;
+use sqlx::types::chrono::Utc;
 
 #[derive(Debug)]
 pub struct AuthAttempt<'a> {
@@ -22,12 +23,14 @@ pub struct AuthAttemptData {
 impl Query<AuthAttemptData> for AuthAttempt<'_> {
     async fn prepare_mysql(
         connection: &mut sqlx::mysql::MySqlConnection,
-    ) -> anyhow::Result<sqlx::mysql::MySqlStatement<'static>> {
-        Ok(connection.prepare(include_str!("mysql/auth.sql")).await?)
+    ) -> anyhow::Result<sqlx::mysql::MySqlStatement> {
+        Ok(connection
+            .prepare(include_str!("mysql/auth.sql").into_sql_str())
+            .await?)
     }
     fn query_mysql<'b>(
         &'b self,
-        statement: &'b sqlx::mysql::MySqlStatement<'static>,
+        statement: &'b sqlx::mysql::MySqlStatement,
     ) -> sqlx::query::Query<'b, sqlx::MySql, sqlx::mysql::MySqlArguments> {
         statement
             .query()
